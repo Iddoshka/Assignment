@@ -1,5 +1,5 @@
 #pragma once
-
+#include"tilemap.h"
 namespace Tmpl8 {
 
 class Surface;
@@ -10,6 +10,7 @@ public:
 	void Init();
 	void Shutdown();
 	void Tick( float deltaTime );
+	void printScreen(TileMaps map);
 	void MouseUp( int button ) { /* implement if you want to detect mouse button presses */ }
 	void MouseDown( int button ) { /* implement if you want to detect mouse button presses */ }
 	void MouseMove( int x, int y ) { /* implement if you want to detect mouse movement */ }
