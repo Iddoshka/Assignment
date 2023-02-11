@@ -1,7 +1,8 @@
 #include "game.h"
 #include "surface.h"
 #include <cstdio> //printf
-
+#include"player.h"
+constexpr float gravity = 0.7f;
 namespace Tmpl8
 {
 	// -----------------------------------------------------------
@@ -20,7 +21,7 @@ namespace Tmpl8
 
 	static Sprite rotatingGun(new Surface("assets/aagun.tga"), 36);
 	static int frame = 0;
-
+	Ball player(ScreenWidth / 2.0f, 0, 18);
 	// -----------------------------------------------------------
 	// Main application tick function
 	// -----------------------------------------------------------
@@ -28,13 +29,9 @@ namespace Tmpl8
 	{
 		// clear the graphics window
 		screen->Clear(0);
-		// print something in the graphics window
-		screen->Print("hello world", 2, 2, 0xffffff);
-		// print something to the text window
-		printf("this goes to the console window.\n");
-		// draw a sprite
-		rotatingGun.SetFrame(frame);
-		rotatingGun.Draw(screen, 100, 100);
-		if (++frame == 36) frame = 0;
+		player.printBall(screen);
+		player.verlet();
+		player.addY(gravity);
+		_sleep(25);
 	}
 };
