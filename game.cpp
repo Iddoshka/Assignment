@@ -13,21 +13,15 @@ namespace Tmpl8
 	
 	void Game::Init()
 	{
-		char obs[(int)mapHeight][(int)mapWidth * 3];
-		for (int i = 0; i < (int)mapHeight - 1; i++)
-		{
-			for (int j = 0; j < mapWidth * 3; j+= 3)
-			{
-				obs[i][j] = 'm', obs[i][j + 1] = 'a', obs[i][j + 2] = ' ';
-			}
-		}
+		char** obs;
+		obs = new char* [1];
+		for(int i = 0; i < 1; i++)
+			obs[i] = new char[(int)mapWidth * 3] ;
 		for (int j = 0; j < (int)mapWidth * 3; j += 3)
 		{
-			obs[(int)mapHeight - 1][j] = 'n', obs[(int)mapHeight - 1][j + 1] = 'e', obs[(int)mapHeight - 1][j + 2] = 'x';
+			obs[0][j] = 'n', obs[0][j + 1] = 'e', obs[0][j + 2] = 'x';
 		}
-		for(int i = 0; i < mapHeight; i++) {
-			tilemap.setTile(obs[i], mapWidth * 3,0, i);
-		}
+		tilemap.setTile(obs, 1, (int)mapWidth * 3, 0, (int)mapHeight-1);
 		tilemap.printMap();
 	}
 	
@@ -60,7 +54,7 @@ namespace Tmpl8
 		screen->Clear(0);
 		printScreen(tilemap);
 		player.printBall(screen);
-		player.verlet();
+		player.verlet(tilemap);
 		player.addY(gravity);
 		_sleep(25);
 	}

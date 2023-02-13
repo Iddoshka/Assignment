@@ -1,5 +1,6 @@
 #include"tilemap.h"
 #include<iostream>
+
 TileMaps::TileMaps(char* TilesIn, int heightIn, int widthIn)
 	:	Tiles(new Tmpl8::Surface(TilesIn))
 {
@@ -11,8 +12,8 @@ TileMaps::TileMaps(char* TilesIn, int heightIn, int widthIn)
 		Map[i] = new char[widthIn];
 		for (int j = 0; j < widthIn; j += 3)
 		{
-			Map[i][j] = 'f';
-			Map[i][j + 1] = 'b';
+			Map[i][j] = 'm';
+			Map[i][j + 1] = 'a';
 			Map[i][j + 2] = ' ';
 		}
 	}
@@ -31,13 +32,13 @@ TileMaps::TileMaps(char* TilesIn)
 		Map[i] = new char[width];
 		for (int j = 0; j < width; j += 3)
 		{
-			Map[i][j] = 'f';
-			Map[i][j + 1] = 'b';
+			Map[i][j] = 'm';
+			Map[i][j + 1] = 'a';
 			Map[i][j + 2] = ' ';
 		}
 	}
 }
-void TileMaps::setTile(char** mapAdd, int sizeI, int sizeJ, int startY, int startX)
+void TileMaps::setTile(char** mapAdd, int sizeI, int sizeJ, int startX, int startY)
 {
 	for (int i = startY; i < sizeI + startY; i++)
 	{

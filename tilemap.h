@@ -1,5 +1,8 @@
 #include "surface.h"
 #include "template.h"
+
+#pragma once
+
 class TileMaps
 {
 	float XoffSet;
@@ -7,6 +10,7 @@ class TileMaps
 	int width;
 	int height;
 	char** Map;
+	Tmpl8::vec4 colliders
 	Tmpl8::Surface* Tiles;
 
 public:
@@ -26,7 +30,7 @@ public:
 		YoffSet = Tmpl8::Clamp(YoffSet, 0.0f, height - 16.0f);
 	}
 	int getHeight() { return height; }
-	void setTile(char** mapAdd, int sizeI, int sizeJ, int startX, int startY);
+	void setTile(char** mapAdd, int sizeI, int sizeJ, int startX, int startY, char sign);
 	void setTile(char* mapAdd, int sizeI, int startX, int startY);
 	void printMap();
 	void DrawTile(int tx, int ty, Tmpl8::Surface* screen, int x, int y);
