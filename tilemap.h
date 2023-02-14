@@ -1,5 +1,6 @@
 #include "surface.h"
 #include "template.h"
+#include<vector>
 
 #pragma once
 
@@ -10,7 +11,7 @@ class TileMaps
 	int width;
 	int height;
 	char** Map;
-	Tmpl8::vec4 colliders
+	std::vector<Tmpl8::vec4> colliders;
 	Tmpl8::Surface* Tiles;
 
 public:
@@ -18,6 +19,7 @@ public:
 	TileMaps(char* TilesIn, int heightIn, int widthtIn);
 	void mapScroll(Tmpl8::Surface* screen, float posY, float posX);
 	char** getMap() { return Map; }
+	std::vector<Tmpl8::vec4> getColliders() { return colliders; }
 	int getWidth() { return width; }
 	float getXoffSet() { return XoffSet; }
 	void setXoffSet(float xoff) {
@@ -31,7 +33,8 @@ public:
 	}
 	int getHeight() { return height; }
 	void setTile(char** mapAdd, int sizeI, int sizeJ, int startX, int startY, char sign);
-	void setTile(char* mapAdd, int sizeI, int startX, int startY);
+	void setTile(char* mapAdd, int sizeI, int startX, int startY, char sign);
+	void setColliders(int strtX, int strtY, int length, int height, char sign);
 	void printMap();
 	void DrawTile(int tx, int ty, Tmpl8::Surface* screen, int x, int y);
 	void DrawTile(int tx, int ty, Tmpl8::Surface* screen, int x, int y, float precY, int startY, float precX, int startX);

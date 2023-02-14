@@ -21,7 +21,9 @@ namespace Tmpl8
 		{
 			obs[0][j] = 'n', obs[0][j + 1] = 'e', obs[0][j + 2] = 'x';
 		}
-		tilemap.setTile(obs, 1, (int)mapWidth * 3, 0, (int)mapHeight-1);
+		tilemap.setTile(obs, 1, (int)mapWidth * 3, 0, (int)mapHeight-1,'x');
+		char ob[4] = "nex";
+		tilemap.setTile(ob,3, 12, 7, 'x');
 		tilemap.printMap();
 	}
 	
@@ -44,7 +46,7 @@ namespace Tmpl8
 		}
 	}
 
-	Ball player(ScreenWidth / 2.0f, 0, 18);
+	Ball player(ScreenWidth / 2.0f + 18, 0, 18);
 	// -----------------------------------------------------------
 	// Main application tick function
 	// -----------------------------------------------------------
@@ -55,6 +57,7 @@ namespace Tmpl8
 		printScreen(tilemap);
 		player.printBall(screen);
 		player.verlet(tilemap);
+		player.mapReact(screen,tilemap);
 		player.addY(gravity);
 		_sleep(25);
 	}

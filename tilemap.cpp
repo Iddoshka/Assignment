@@ -38,8 +38,9 @@ TileMaps::TileMaps(char* TilesIn)
 		}
 	}
 }
-void TileMaps::setTile(char** mapAdd, int sizeI, int sizeJ, int startX, int startY)
+void TileMaps::setTile(char** mapAdd, int sizeI, int sizeJ, int startX, int startY,char sign)
 {
+	startX *= 3;
 	for (int i = startY; i < sizeI + startY; i++)
 	{
 		for (int j = startX; j < sizeJ + startX; j++)
@@ -47,15 +48,29 @@ void TileMaps::setTile(char** mapAdd, int sizeI, int sizeJ, int startX, int star
 			Map[i][j] = mapAdd[i - startY][j - startX];
 		}
 	}
+	setColliders(startX * 32, startY * 32, sizeJ / 3 * 32, sizeI * 32, sign);
 }
-void TileMaps::setTile(char* mapAdd, int sizeI, int startX, int startY)
+void TileMaps::setTile(char* mapAdd, int sizeI, int startX, int startY, char sign)
 {
+	startX *= 3;
 	for (int j = startX; j < sizeI + startX; j++)
 	{
 		Map[startY][j] = mapAdd[j - startX];
 	}
+	setColliders(startX/3 * 32, startY * 32, sizeI / 3 * 32, 32, sign);
 }
 
+void TileMaps::setColliders(int strtX, int strtY, int length, int height, char sign)
+{
+	switch (sign)
+	{
+	case 'x':
+		colliders.push_back(Tmpl8::vec4(strtX, strtY, length, height));
+		break;
+	default:
+		break;
+	}
+}
 void TileMaps::printMap()
 {
 	for (int i = 0; i < height; i++)
