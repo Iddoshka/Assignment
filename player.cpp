@@ -29,6 +29,7 @@ void Ball::printBall(Tmpl8::Surface* screen)
 void Ball::verlet(TileMaps map)
 {
 	velocity.x = coordinates.x - pcord.x, velocity.y = coordinates.y - pcord.y;
+	velocity += acceleration;
 	// store previous position.
 	pcord.x = coordinates.x, pcord.y = coordinates.y;
 	// Verlet integration
@@ -55,7 +56,7 @@ void Ball::mapReact(Tmpl8::Surface* screen, TileMaps map)
 			Tmpl8::vec2 fix = Tmpl8::vec2(r) - diff;
 			coordinates.x -= fmod(fix.x, r);
 			coordinates.y -= fmod(fix.y, r);
-			pcord += coordinates + diff;
+			pcord = coordinates + diff;
 		}
 	}
 	//constraints

@@ -12,14 +12,14 @@ class Ball
 	bool jumpAble; //an indicator for if the player can jump at a certian point or not
 	Tmpl8::vec2 pcord; //here will be saved the previous coordinates(px and py)
 	Tmpl8::vec2 velocity = 0.0f;
+	Tmpl8::vec2 acceleration = 0.0f;
 	int r; // the balls radius
 	bool collision;
 public:
 	Ball(float xIn, float yIn, int rIn);
+	void setAcc(float xIn, float yIn) { acceleration.x = xIn, acceleration.y = yIn; }
 	void setX(float xIn) { coordinates.x = xIn; } // to change the x coordinate
 	void setY(float yIn) { coordinates.y = yIn; } // to change the y coordinate
-	void addX(float xIn) { coordinates.x += xIn; } // to add to the x coordinate
-	void addY(float yIn) { coordinates.y += yIn; } // to add to the y coordinate
 	void setPX(float pxIn) { pcord.x = pxIn; } // to save the last x coordinate
 	void setPY(float pyIn) { pcord.y = pyIn; } // to save the last y coordinate
 	void enableJump() { jumpAble = true; } // to enable the jump bool
@@ -28,6 +28,7 @@ public:
 	Tmpl8::vec2 getCrd() { return coordinates; } // returns the coordinate vector
 	Tmpl8::vec2 getPcord() { return pcord; } // returns the velocity vector
 	Tmpl8::vec2 getVel() { return velocity; }
+	Tmpl8::vec2 getAcc() { return acceleration; }
 	int getRadius() { return r; } // return the radius variable
 	void mapReact(Tmpl8::Surface* screen, TileMaps map); // for any reaction with the tilemap tiles
 	void printBall(Tmpl8::Surface* screen); // to print the body of the ball and if its able to jump the a green outline

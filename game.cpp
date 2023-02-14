@@ -58,7 +58,7 @@ namespace Tmpl8
 		player.printBall(screen);
 		player.verlet(tilemap);
 		player.mapReact(screen,tilemap);
-		player.addY(gravity);
+		player.setAcc(0,gravity);
 		_sleep(25);
 	}
 };
