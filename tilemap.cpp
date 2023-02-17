@@ -48,7 +48,7 @@ void TileMaps::setTile(char** mapAdd, int sizeI, int sizeJ, int startX, int star
 			Map[i][j] = mapAdd[i - startY][j - startX];
 		}
 	}
-	setColliders(startX * 32, startY * 32, sizeJ / 3 * 32, sizeI * 32, sign);
+	setColliders(startX/3 * 32, startY * 32, sizeJ / 3 * 32, sizeI * 32, sign);
 }
 void TileMaps::setTile(char* mapAdd, int sizeI, int startX, int startY, char sign)
 {

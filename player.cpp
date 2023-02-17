@@ -28,15 +28,15 @@ void Ball::printBall(Tmpl8::Surface* screen)
 
 void Ball::verlet(TileMaps map)
 {
-	velocity.x = coordinates.x - pcord.x, velocity.y = coordinates.y - pcord.y;
-	velocity += acceleration;
+	velocity.x = coordinates.x - pcord.x , velocity.y = coordinates.y - pcord.y ;
+	//velocity += acceleration;
 	// store previous position.
 	pcord.x = coordinates.x, pcord.y = coordinates.y;
 	// Verlet integration
 	coordinates.x += velocity.x;
 	coordinates.y += velocity.y;
-	if(!collision) 
-		coordinates.y += gravity;
+
+	coordinates.y += gravity;
 }
 
 void Ball::mapReact(Tmpl8::Surface* screen, TileMaps map)
@@ -49,19 +49,35 @@ void Ball::mapReact(Tmpl8::Surface* screen, TileMaps map)
 		clamped.x = Tmpl8::Clamp(diff.x, -a.z / 2.0f, a.z / 2.0f);
 		clamped.y = Tmpl8::Clamp(diff.y, -a.w / 2.0f, a.w / 2.0f);
 		Tmpl8::vec2 closest = tileCenter + clamped;
-		diff = closest - coordinates;
+		diff = -closest + coordinates;
 		//printf("diff.length: %f\n", tileCenter.y);
 		if (diff.length() <= r)
 		{
-			Tmpl8::vec2 fix = Tmpl8::vec2(r) - diff;
-			coordinates.x -= fmod(fix.x, r);
-			coordinates.y -= fmod(fix.y, r);
-			pcord = coordinates + diff;
+			Tmpl8::vec2 dir;
+			Tmpl8::vec2 fix(r - abs(Tmpl8::Min(diff.x,0.0f)),r - abs(diff.y));
+			if (closest.y > coordinates.y)
+				dir.y = 1;
+			else
+				dir.y = -1;
+			coordinates.x -= fmodf(fix.x, r);
+			coordinates.y -= fmodf((fix.y * dir.y), r);
+			pcord = coordinates;
+			printf("%f\n", fmodf(fix.y, r));
+			pcord.x -= diff.x + velocity.x;
+			pcord.y -= Tmpl8::Clamp(diff.y,-velocity.y * dir.y,velocity.y * dir.y);
 		}
 	}
 	//constraints
 	if (coordinates.y > ScreenHeight - (r + 1)) // checking for bottom of the screen collision
 	{
 		pcord.y = coordinates.y, coordinates.y = ScreenHeight - (r + 1);
+	}
+	if (coordinates.x > ScreenWidth - (r + 1)) // checking for right side of the screen collision
+	{
+		coordinates.x = ScreenWidth - (r + 1), pcord.x = coordinates.x + velocity.x;
+	}
+	if (coordinates.x < (r + 1)) // checking for left side of the screen collision
+	{
+		coordinates.x = (r + 1), pcord.x = coordinates.x + velocity.x;
 	}
 }
