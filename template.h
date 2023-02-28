@@ -264,5 +264,7 @@ inline bool BadFloat(float x)
 {
 	return ((*reinterpret_cast<uint*>(&x) & 0x7f000000) == 0x7f000000);
 }
-	
+vec2 vectorIntersection(vec2 d1, vec2 d2, vec2 p1, vec2 p2);
+vec2 vectorRectangleIntersection(vec2 p, vec2 d, vec4 rect);
+
 }; // namespace Tmpl8

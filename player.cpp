@@ -26,9 +26,25 @@ void Ball::printBall(Tmpl8::Surface* screen)
 	}
 }
 
+Tmpl8::vec2 Ball::checkCollision(Tmpl8::vec4 coll_obj)
+{
+	Tmpl8::vec2 tileCenter((coll_obj.x) + coll_obj.z / 2, (coll_obj.y) + coll_obj.w / 2);
+	Tmpl8::vec2 diff = coordinates - tileCenter;
+	Tmpl8::vec2 clamped;
+	clamped.x = Tmpl8::Clamp(diff.x, -coll_obj.z / 2.0f, coll_obj.z / 2.0f);
+	clamped.y = Tmpl8::Clamp(diff.y, -coll_obj.w / 2.0f, coll_obj.w / 2.0f);
+	Tmpl8::vec2 closest = tileCenter + clamped;
+	if (closest.x == coordinates.x && closest.y == coordinates.y)
+	{
+		closest = Tmpl8::vectorRectangleIntersection(pcord, coordinates, coll_obj);
+	}
+	return (coordinates - closest);
+}
+
 void Ball::verlet(TileMaps map)
 {
 	velocity.x = coordinates.x - pcord.x , velocity.y = coordinates.y - pcord.y ;
+	
 	//velocity += acceleration;
 	// store previous position.
 	pcord.x = coordinates.x, pcord.y = coordinates.y;
@@ -37,47 +53,69 @@ void Ball::verlet(TileMaps map)
 	coordinates.y += velocity.y;
 
 	coordinates.y += gravity;
+	if (coordinates.y > ScreenHeight - (r + 1)) // checking for bottom of the screen collision
+	{
+		pcord.y = coordinates.y, coordinates.y = ScreenHeight - (r + 1);
+		dir.y = -1;
+	}
+	if (coordinates.x > ScreenWidth - (r + 1)) // checking for right side of the screen collision
+	{
+		coordinates.x = ScreenWidth - (r + 1), pcord.x = coordinates.x + velocity.x;
+		dir.x = -1;
+	}
+	if (coordinates.x < (r + 1)) // checking for left side of the screen collision
+	{
+		coordinates.x = (r + 1), pcord.x = coordinates.x + velocity.x;
+		dir.x = 1;
+	}
 }
 
 void Ball::mapReact(Tmpl8::Surface* screen, TileMaps map)
 {
 	for (auto a : map.getColliders())
 	{
-		Tmpl8::vec2 tileCenter((a.x) + a.z/ 2, (a.y) + a.w / 2);
-		Tmpl8::vec2 diff = coordinates - tileCenter;
-		Tmpl8::vec2 clamped;
-		clamped.x = Tmpl8::Clamp(diff.x, -a.z / 2.0f, a.z / 2.0f);
-		clamped.y = Tmpl8::Clamp(diff.y, -a.w / 2.0f, a.w / 2.0f);
-		Tmpl8::vec2 closest = tileCenter + clamped;
-		diff = -closest + coordinates;
-		//printf("diff.length: %f\n", tileCenter.y);
-		if (diff.length() <= r)
+		Tmpl8::vec2 diff = checkCollision(a);
+		if (diff.length() > r)
 		{
-			Tmpl8::vec2 dir;
-			Tmpl8::vec2 fix(r - abs(Tmpl8::Min(diff.x,0.0f)),r - abs(diff.y));
-			if (closest.y > coordinates.y)
-				dir.y = 1;
-			else
-				dir.y = -1;
-			coordinates.x -= fmodf(fix.x, r);
-			coordinates.y -= fmodf((fix.y * dir.y), r);
-			pcord = coordinates;
-			printf("%f\n", fmodf(fix.y, r));
-			pcord.x -= diff.x + velocity.x;
-			pcord.y -= Tmpl8::Clamp(diff.y,-velocity.y * dir.y,velocity.y * dir.y);
+			continue;
 		}
+		printf("before: %f\n\n", velocity.length());
+		diff.x = diff.x < 0.0001f && diff.x > -0.0001f ? 0 : diff.x;
+		diff.y = diff.y < 0.0001f && diff.y > -0.0001f ? 0 : diff.y;
+		Tmpl8::vec2 fix(0);
+		if (diff.y < 0)
+			dir.y = 1;
+		else if(diff.y > 0)
+			dir.y = -1;
+		if (diff.x > 0)
+			dir.x = 1;
+		else if(diff.x < 0)
+			dir.x = -1;
+		//fix.y += diff.x != 0? r - abs(Tmpl8::Min(diff.y, 0.0f)) : r - abs(diff.y);
+		fix.y += r - abs(diff.y);
+		fix.x += r - abs(diff.x);
+		if (diff.x != 0 && diff.y > 0)
+		{
+			printf("hi");
+		}
+		if (diff.y == 0)
+		{
+			diff.y = (velocity.y / velocity.length()) * diff.length();
+		}
+		if (diff.x == 0)
+		{
+			diff.x = (velocity.x / velocity.length()) * diff.length();
+		}
+		Tmpl8::vec2 newVel;
+		newVel.x = velocity.length() * (diff.x / diff.length());
+		newVel.y = velocity.length() * (diff.y / diff.length());
+		coordinates.x -= 2 * (fmodf(fix.x , r) * velocity.x/velocity.length());// new to change so it will keep the fix on the same vector as the newVel vector
+		coordinates.y -= 2 * (fmodf((fix.y ), r) * abs(velocity.y)/velocity.length()) * dir.y;
+		pcord = coordinates;
+		pcord.y -= newVel.y;//the direction of the fix and the direction of the bounce velocity do not match causing the wierd staggering movement
+		pcord.x -= newVel.x;
+		printf("after: %f\n\n", newVel.length());
 	}
 	//constraints
-	if (coordinates.y > ScreenHeight - (r + 1)) // checking for bottom of the screen collision
-	{
-		pcord.y = coordinates.y, coordinates.y = ScreenHeight - (r + 1);
-	}
-	if (coordinates.x > ScreenWidth - (r + 1)) // checking for right side of the screen collision
-	{
-		coordinates.x = ScreenWidth - (r + 1), pcord.x = coordinates.x + velocity.x;
-	}
-	if (coordinates.x < (r + 1)) // checking for left side of the screen collision
-	{
-		coordinates.x = (r + 1), pcord.x = coordinates.x + velocity.x;
-	}
+	
 }

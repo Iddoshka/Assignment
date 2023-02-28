@@ -9,11 +9,14 @@ class Ball
 {
 	Tmpl8::Sprite ball_sprite; //the sprite will be of the ping ball from the assets folder
 	Tmpl8::vec2 coordinates; //for the players coordinates
+	Tmpl8::vec2 dir = 1; //players direction, 1 is towards the max width or height, -1 is towards the zero value of the axis
 	bool jumpAble; //an indicator for if the player can jump at a certian point or not
 	Tmpl8::vec2 pcord; //here will be saved the previous coordinates(px and py)
 	Tmpl8::vec2 velocity = 0.0f;
 	int r; // the balls radius
 	bool collision;
+
+	Tmpl8::vec2 checkCollision(Tmpl8::vec4 coll_obj);
 public:
 	Ball(float xIn, float yIn, int rIn);
 	void setX(float xIn) { coordinates.x = xIn; } // to change the x coordinate

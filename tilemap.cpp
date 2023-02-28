@@ -48,7 +48,7 @@ void TileMaps::setTile(char** mapAdd, int sizeI, int sizeJ, int startX, int star
 			Map[i][j] = mapAdd[i - startY][j - startX];
 		}
 	}
-	setColliders(startX/3 * 32, startY * 32, sizeJ / 3 * 32, sizeI * 32, sign);
+	setColliders(startX/3 * 32, startY * 32, (sizeJ / 3) * 32, sizeI * 32, sign);
 }
 void TileMaps::setTile(char* mapAdd, int sizeI, int startX, int startY, char sign)
 {
@@ -107,8 +107,8 @@ void TileMaps::mapScroll(Tmpl8::Surface* screen, float posY, float posX)
 	int XmapStart = (int)posX;
 	float Yprec = Tmpl8::Clamp(fmodf(posY, 1), 0.0f, (float)(height - 16.0f));
 	float Xprec = Tmpl8::Clamp(fmodf(posX, 1), 0.0f, (float)(width / 3.0f - 25.0f));
-	for (int y = YmapStart; y < YmapStart + 16; y++)
-		for (int x = XmapStart; x < XmapStart + 25; x++)
+	for (int y = YmapStart; y <		Tmpl8::Clamp(YmapStart + 16, 16, height); y++)
+		for (int x = XmapStart; x < Tmpl8::Clamp(XmapStart + 25, 25,width/3); x++)
 		{
 			int tx = Map[y][(x) * 3] - 'a';
 			int ty = Map[y][(x) * 3 + 1] - 'a';
