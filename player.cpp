@@ -109,8 +109,10 @@ void Ball::mapReact(Tmpl8::Surface* screen, TileMaps map)
 		Tmpl8::vec2 newVel;
 		newVel.x = velocity.length() * (diff.x / diff.length());
 		newVel.y = velocity.length() * (diff.y / diff.length());
-		coordinates.x -= 2 * (fmodf(fix.x , r) * velocity.x/velocity.length());// new to change so it will keep the fix on the same vector as the newVel vector
-		coordinates.y -= 2 * (fmodf((fix.y ), r) * abs(velocity.y)/velocity.length()) * dir.y;
+		fix.x = (fmodf(fix.x, r) * abs(velocity.x) / velocity.length());
+		fix.y = (fmodf(fix.y, r) * abs(velocity.y) / velocity.length());
+		coordinates.x -= 2 * dir.x * (fix.x * (abs(newVel.x) / newVel.length()));// new to change so it will keep the fix on the same vector as the newVel vector
+		coordinates.y -= 2 * dir.y * (fix.y * (abs(newVel.y) / newVel.length()));
 		pcord = coordinates;
 		pcord.y -= newVel.y;//the direction of the fix and the direction of the bounce velocity do not match causing the wierd staggering movement
 		pcord.x -= newVel.x;
