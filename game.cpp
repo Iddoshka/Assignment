@@ -24,7 +24,7 @@ namespace Tmpl8
 		tilemap.setTile(obs, 1, tilemap.getWidth(), 0, (int)mapHeight-1,'x');
 		char ob[4] = "nex";
 		tilemap.setTile(ob,3, 0, 7, 'x');
-		tilemap.setTile("aex", 3, 5, 7, 'x');
+		tilemap.setTile("aex", 3, 5, 9, 'x');
 		tilemap.printMap();
 	}
 	

@@ -34,15 +34,16 @@ Tmpl8::vec2 Ball::checkCollision(Tmpl8::vec4 coll_obj)
 	clamped.x = Tmpl8::Clamp(diff.x, -coll_obj.z / 2.0f, coll_obj.z / 2.0f);
 	clamped.y = Tmpl8::Clamp(diff.y, -coll_obj.w / 2.0f, coll_obj.w / 2.0f);
 	Tmpl8::vec2 closest = tileCenter + clamped;
-	if (closest.x == coordinates.x && closest.y == coordinates.y)
+	/*if (closest.x == coordinates.x && closest.y == coordinates.y)
 	{
 		closest = Tmpl8::vectorRectangleIntersection(pcord, coordinates, coll_obj);
-	}
+	}*/
 	return (coordinates - closest);
 }
 
 void Ball::verlet(TileMaps map)
 {
+	
 	velocity.x = coordinates.x - pcord.x , velocity.y = coordinates.y - pcord.y ;
 	
 	//velocity += acceleration;
@@ -51,7 +52,6 @@ void Ball::verlet(TileMaps map)
 	// Verlet integration
 	coordinates.x += velocity.x;
 	coordinates.y += velocity.y;
-
 	coordinates.y += gravity;
 	if (coordinates.y > ScreenHeight - (r + 1)) // checking for bottom of the screen collision
 	{
@@ -94,26 +94,38 @@ void Ball::mapReact(Tmpl8::Surface* screen, TileMaps map)
 		//fix.y += diff.x != 0? r - abs(Tmpl8::Min(diff.y, 0.0f)) : r - abs(diff.y);
 		fix.y += r - abs(diff.y);
 		fix.x += r - abs(diff.x);
-		if (diff.x != 0 && diff.y > 0)
+		if (diff.x < 0 && diff.y < -16)
 		{
-			printf("hi");
+			printf("diff length: %f\n",abs(velocity.y)/velocity.length());
+		}
+		Tmpl8::vec2 newVel;
+		float diff_sum = (abs(diff.x) + abs(diff.y));
+		float vel_sum = (abs(velocity.x) + abs(velocity.y));
+		newVel.x = velocity.length() * (diff.x / diff.length());//this is not right
+		newVel.y = velocity.length() * (fix.y / fix.length()) * dir.y;
+		fix.x = fmodf(fix.x, r) * abs(velocity.x) / velocity.length();
+		fix.y = fmodf(fix.y, r) * abs(velocity.y) / velocity.length();
+		if ((diff.y < -16 || diff.y > 16) && velocity.y < 1 && diff.x != 0)
+		{
+			printf("newVel length: %f : %f\n",newVel.length(), velocity.length());
+		}
+		float ratio = fix.length() / newVel.length();
+		coordinates.x += 2 * (newVel.x * ratio);// new to change so it will keep the fix on the same vector as the newVel vector
+		coordinates.y += 2 * (newVel.y * ratio);
+		pcord = coordinates;
+		if (diff.x == 0)
+		{
+			newVel = { velocity.x, -velocity.y};
 		}
 		if (diff.y == 0)
 		{
-			diff.y = (velocity.y / velocity.length()) * diff.length();
+			newVel = { -velocity.x, velocity.y };
 		}
-		if (diff.x == 0)
+		if (newVel.length() != velocity.length() || newVel.length() < 0.5)
 		{
-			diff.x = (velocity.x / velocity.length()) * diff.length();
+			printf("newVel length: %f, velocity length: %f\n", newVel.length(),velocity.length());
+			printf("hi");
 		}
-		Tmpl8::vec2 newVel;
-		newVel.x = velocity.length() * (diff.x / diff.length());
-		newVel.y = velocity.length() * (diff.y / diff.length());
-		fix.x = (fmodf(fix.x, r) * abs(velocity.x) / velocity.length());
-		fix.y = (fmodf(fix.y, r) * abs(velocity.y) / velocity.length());
-		coordinates.x -= 2 * dir.x * (fix.x * (abs(newVel.x) / newVel.length()));// new to change so it will keep the fix on the same vector as the newVel vector
-		coordinates.y -= 2 * dir.y * (fix.y * (abs(newVel.y) / newVel.length()));
-		pcord = coordinates;
 		pcord.y -= newVel.y;//the direction of the fix and the direction of the bounce velocity do not match causing the wierd staggering movement
 		pcord.x -= newVel.x;
 		printf("after: %f\n\n", newVel.length());
