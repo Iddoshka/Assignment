@@ -15,16 +15,44 @@ namespace Tmpl8
 	{
 		char** obs;
 		obs = new char* [1];
+		char** obsV;
+		obsV = new char* [tilemap.getHeight() - 2];
 		for(int i = 0; i < 1; i++)
 			obs[i] = new char[tilemap.getWidth()];
+		for (int i = 0; i < tilemap.getHeight() - 2; i++)
+			obsV[i] = new char[3];
+
+		//bottom side
 		for (int j = 0; j < tilemap.getWidth(); j += 3)
 		{
 			obs[0][j] = 'n', obs[0][j + 1] = 'e', obs[0][j + 2] = 'x';
 		}
 		tilemap.setTile(obs, 1, tilemap.getWidth(), 0, (int)mapHeight-1,'x');
+
+		//top side
+		for (int j = 0; j < tilemap.getWidth(); j += 3)
+		{
+			obs[0][j] = 'a', obs[0][j + 1] = 'e', obs[0][j + 2] = 'x';
+		}
+		tilemap.setTile(obs, 1, tilemap.getWidth(), 0, 0, 'x');
+
+		//right side
+		for (int j = 0; j < tilemap.getHeight() - 2; j++)
+		{
+			obsV[j][0] = 'j', obsV[j][1] = 'd', obsV[j][2] = 'x';
+		}
+		tilemap.setTile(obsV, tilemap.getHeight() - 2,3, (int)mapWidth -1, 1, 'x');
+
+		//left side
+		for (int j = 0; j < tilemap.getHeight() - 2; j++ )
+		{
+			obsV[j][0] = 'l', obsV[j][1] = 'f', obsV[j][2] = 'x';
+		}
+		tilemap.setTile(obsV, tilemap.getHeight() - 2, 3, 0, 1, 'x');
+
 		char ob[4] = "nex";
-		tilemap.setTile(ob,3, 0, 7, 'x');
-		tilemap.setTile("aex", 3, 5, 9, 'x');
+		//tilemap.setTile(ob,3, 0, 7, 'x');
+		//tilemap.setTile("aex", 3, 5, 9, 'x');
 		tilemap.printMap();
 	}
 	
@@ -47,7 +75,7 @@ namespace Tmpl8
 		}
 	}
 
-	Ball player(34, 37, 18);
+	Ball player(68, 74, 18);
 	// -----------------------------------------------------------
 	// Main application tick function
 	// -----------------------------------------------------------

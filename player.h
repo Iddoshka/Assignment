@@ -17,6 +17,7 @@ class Ball
 	bool collision;
 
 	Tmpl8::vec2 checkCollision(Tmpl8::vec4 coll_obj);
+	Tmpl8::vec2 linearFunc(Tmpl8::vec2 diff);
 public:
 	Ball(float xIn, float yIn, int rIn);
 	void setX(float xIn) { coordinates.x = xIn; } // to change the x coordinate

@@ -1,14 +1,14 @@
 #include"player.h"
 #include"game.h"
 
-constexpr float gravity = 0.5f;
+constexpr float gravity = 0.0f;//0.5f;
 
 Ball::Ball(float xIn, float yIn, int rIn) // initialzing the player with its sprite and the given coordinates and radius
 	:	ball_sprite(new Tmpl8::Surface("assets/ball.png"),1)
 {
 	coordinates.x = xIn, coordinates.y = yIn;
 	r = rIn;
-	pcord.x = xIn, pcord.y = yIn;
+	pcord.x = xIn - 4, pcord.y = yIn - 14;
 	jumpAble = false;
 	collision = false;
 }
@@ -39,6 +39,15 @@ Tmpl8::vec2 Ball::checkCollision(Tmpl8::vec4 coll_obj)
 		closest = Tmpl8::vectorRectangleIntersection(pcord, coordinates, coll_obj);
 	}*/
 	return (coordinates - closest);
+}
+
+Tmpl8::vec2 Ball::linearFunc(Tmpl8::vec2 diff)
+{
+	Tmpl8::vec2 fix = { fmodf(r - abs(diff.x),r), fmodf(r - abs(diff.y),r) };
+	float m = (coordinates.y - pcord.y) / (coordinates.x - pcord.x);
+	float b = pcord.y - m * pcord.x;
+	Tmpl8::vec2 newCord = { ((coordinates.y + (fix.y * dir.y) - b) / m) + (fix.x * dir.x), ((coordinates.x + (fix.x * dir.x)) * m + b) + (fix.y * dir.y)};
+	return newCord;
 }
 
 void Ball::verlet(TileMaps map)
@@ -79,56 +88,23 @@ void Ball::mapReact(Tmpl8::Surface* screen, TileMaps map)
 		{
 			continue;
 		}
-		printf("before: %f\n\n", velocity.length());
-		diff.x = diff.x < 0.0001f && diff.x > -0.0001f ? 0 : diff.x;
-		diff.y = diff.y < 0.0001f && diff.y > -0.0001f ? 0 : diff.y;
-		Tmpl8::vec2 fix(0);
+		if (diff.y > 0)
+			dir.y = 1, velocity.y *= -1;
 		if (diff.y < 0)
-			dir.y = 1;
-		else if(diff.y > 0)
-			dir.y = -1;
+			dir.y = -1, velocity.y *= -1;
+		if (diff.x < 0)
+			dir.x = -1,velocity.x *= -1;
 		if (diff.x > 0)
-			dir.x = 1;
-		else if(diff.x < 0)
-			dir.x = -1;
-		//fix.y += diff.x != 0? r - abs(Tmpl8::Min(diff.y, 0.0f)) : r - abs(diff.y);
-		fix.y += r - abs(diff.y);
-		fix.x += r - abs(diff.x);
-		if (diff.x < 0 && diff.y < -16)
-		{
-			printf("diff length: %f\n",abs(velocity.y)/velocity.length());
-		}
-		Tmpl8::vec2 newVel;
-		float diff_sum = (abs(diff.x) + abs(diff.y));
-		float vel_sum = (abs(velocity.x) + abs(velocity.y));
-		newVel.x = velocity.length() * (diff.x / diff.length());//this is not right
-		newVel.y = velocity.length() * (fix.y / fix.length()) * dir.y;
-		fix.x = fmodf(fix.x, r) * abs(velocity.x) / velocity.length();
-		fix.y = fmodf(fix.y, r) * abs(velocity.y) / velocity.length();
-		if ((diff.y < -16 || diff.y > 16) && velocity.y < 1 && diff.x != 0)
-		{
-			printf("newVel length: %f : %f\n",newVel.length(), velocity.length());
-		}
-		float ratio = fix.length() / newVel.length();
-		coordinates.x += 2 * (newVel.x * ratio);// new to change so it will keep the fix on the same vector as the newVel vector
-		coordinates.y += 2 * (newVel.y * ratio);
-		pcord = coordinates;
-		if (diff.x == 0)
-		{
-			newVel = { velocity.x, -velocity.y};
-		}
-		if (diff.y == 0)
-		{
-			newVel = { -velocity.x, velocity.y };
-		}
-		if (newVel.length() != velocity.length() || newVel.length() < 0.5)
-		{
-			printf("newVel length: %f, velocity length: %f\n", newVel.length(),velocity.length());
-			printf("hi");
-		}
-		pcord.y -= newVel.y;//the direction of the fix and the direction of the bounce velocity do not match causing the wierd staggering movement
-		pcord.x -= newVel.x;
-		printf("after: %f\n\n", newVel.length());
+			dir.x = 1, velocity.x *= -1;
+		if (diff.x < 0)
+			printf("stop!");
+		Tmpl8::vec2 newCord(linearFunc(diff));
+		printf("new coordinate: (%f, %f)\n", newCord.x, newCord.y);
+		Tmpl8::vec2 dist(coordinates - newCord);
+		coordinates = { newCord.x + (abs(dist.x) * dir.x), newCord.y + (abs(dist.y) * dir.y)};
+		pcord = { coordinates.x - velocity.x,coordinates.y - velocity.y };
+		printf("distance to fix: %f\n", dist.length());
+		//pcord = coordinates;
 	}
 	//constraints
 	
