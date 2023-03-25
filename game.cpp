@@ -9,7 +9,7 @@ constexpr float mapHeight = ScreenHeight / 32.0f;
 constexpr float mapWidth = ScreenWidth / 32.0f;
 namespace Tmpl8
 {
-	TileMaps tilemap("assets/nc2tiles.png", mapHeight, mapWidth * 3);
+	TileMaps tilemap("assets/nc2tiles.png", mapHeight, mapWidth * 6);
 	
 	void Game::Init()
 	{
@@ -41,7 +41,7 @@ namespace Tmpl8
 		{
 			obsV[j][0] = 'j', obsV[j][1] = 'd', obsV[j][2] = 'x';
 		}
-		tilemap.setTile(obsV, tilemap.getHeight() - 2,3, (int)mapWidth -1, 1, 'x');
+		tilemap.setTile(obsV, tilemap.getHeight() - 2,3, ((int)mapWidth) -1, 1, 'x');
 
 		//left side
 		for (int j = 0; j < tilemap.getHeight() - 2; j++ )
@@ -52,7 +52,7 @@ namespace Tmpl8
 
 		char ob[4] = "nex";
 		//tilemap.setTile(ob,3, 0, 7, 'x');
-		//tilemap.setTile("aex", 3, 5, 9, 'x');
+		//tilemap.setTile("aex", 3, 4, 13, 'x');
 		tilemap.printMap();
 	}
 	
@@ -83,9 +83,9 @@ namespace Tmpl8
 	{
 		// clear the graphics window
 		screen->Clear(0);
-		printScreen(tilemap);
-		//tilemap.mapScroll(screen, player.getCrd().y / 32.0f, player.getCrd().x / 32.0f);
-		player.printBall(screen);
+		//printScreen(tilemap);
+		tilemap.mapScroll(screen);
+		player.printBall(screen);	
 		player.verlet(tilemap);
 		player.mapReact(screen,tilemap);
 		_sleep(25);

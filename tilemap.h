@@ -17,7 +17,7 @@ class TileMaps
 public:
 	TileMaps(char* TilesIn);
 	TileMaps(char* TilesIn, int heightIn, int widthtIn);
-	void mapScroll(Tmpl8::Surface* screen, float posY, float posX);
+	void mapScroll(Tmpl8::Surface* screen);
 	char** getMap() { return Map; }
 	std::vector<Tmpl8::vec4> getColliders() { return colliders; }
 	int getWidth() { return width; }

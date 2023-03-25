@@ -97,19 +97,26 @@ void TileMaps::DrawTile(int tx, int ty, Tmpl8::Surface* screen, int x, int y, fl
 {
 	Tmpl8::Pixel* src = Tiles->GetBuffer() + 1 + tx * 33 + (1 + ty * 33) * 595;
 	Tmpl8::Pixel* dst = screen->GetBuffer() + x + y * 800;
-	for (int i = startY; i < 32 * precY; i++, src += 595, dst += 800)
+	for (int i = 0; i < 32 * precY; i++, src += 595, dst += 800)
 		for (int j = 0; j < 32 * precX; j++)
-			dst[j] = src[(j + startX) + startY * 595];
+			dst[j] = src[(j + startX)];
 }
-void TileMaps::mapScroll(Tmpl8::Surface* screen, float posY, float posX)
+void TileMaps::mapScroll(Tmpl8::Surface* screen)
 {
 	for (int i = 0; i < ScreenHeight/32; i++)
 	{
-		for (int j = 0; j < ScreenWidth/32; j++)
+		for (int j = 0; j < ScreenWidth/32 + int(fmodf(2-fmodf(XoffSet,1),2)); j++)
 		{
-			int tx = Map[int(i + YoffSet)][int(j + XoffSet) * 3] - 'a';
-			int ty = Map[int(i + YoffSet)][int(j + XoffSet) * 3 + 1] - 'a';
-
+			int tx = Map[int(i)][int(j + XoffSet) * 3] - 'a';
+			int ty = Map[int(i)][int(j + XoffSet) * 3 + 1] - 'a';
+			float precX = 1, precY = 1;
+			int startX = 0, startY = 0;
+			int posX = (j * 32) - int(fmodf(XoffSet, 1) * 32), posY = (i * 32);
+			if (j == 0)
+				startX = int(fmodf(XoffSet, 1) * 32),posX = 0,precX = 1.0f - fmodf(XoffSet,1);
+			if (j == (ScreenWidth / 32 + int(fmodf(2 - fmodf(XoffSet, 1), 2))) - 1)
+				precX = (fmodf(XoffSet,1) == 0.0f) ? 1.0f : fmodf(XoffSet, 1);
+			DrawTile(tx, ty, screen, posX, posY,precY,startY,precX,startX);
 		}
 	}
 	/*int YmapStart = (int)posY;
