@@ -85,7 +85,8 @@ namespace Tmpl8
 		screen->Clear(0);
 		//printScreen(tilemap);
 		tilemap.mapScroll(screen);
-		player.printBall(screen);	
+		player.printBall(screen);
+		player.Drive(tilemap);
 		player.verlet(tilemap);
 		player.mapReact(screen,tilemap);
 		_sleep(25);
