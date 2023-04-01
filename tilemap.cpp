@@ -55,7 +55,7 @@ void TileMaps::setTile(char* mapAdd, int sizeI, int startX, int startY, char sig
 	startX *= 3;
 	for (int j = startX; j < sizeI + startX; j++)
 	{
-		Map[startY][j] = mapAdd[j - startX];
+		Map[startY][j] = mapAdd[(j - startX) % sizeof(&mapAdd)];
 	}
 	setColliders(startX/3 * 32, startY * 32, sizeI / 3 * 32, 32, sign);
 }
@@ -66,6 +66,9 @@ void TileMaps::setColliders(int strtX, int strtY, int length, int height, char s
 	{
 	case 'x':
 		colliders.push_back(Tmpl8::vec4(strtX, strtY, length, height));
+		break;
+	case 'j':
+		jumpers.push_back(Tmpl8::vec4(strtX, strtY, length, height));
 		break;
 	default:
 		break;
@@ -99,99 +102,29 @@ void TileMaps::DrawTile(int tx, int ty, Tmpl8::Surface* screen, int x, int y, fl
 	Tmpl8::Pixel* dst = screen->GetBuffer() + x + y * 800;
 	for (int i = 0; i < 32 * precY; i++, src += 595, dst += 800)
 		for (int j = 0; j < 32 * precX; j++)
-			dst[j] = src[(j + startX)];
+			dst[j] = src[(j + startX) + startY * 595];
 }
 void TileMaps::mapScroll(Tmpl8::Surface* screen)
 {
-	for (int i = 0; i < ScreenHeight/32; i++)
+	for (int i = 0; i < ScreenHeight/32 + int(fmodf(2 - fmodf(YoffSet, 1), 2)); i++)
 	{
-		for (int j = 0; j < ScreenWidth/32 + int(fmodf(2-fmodf(XoffSet,1),2)); j++)
+		for (int j = 0; j < ScreenWidth/32 + int(fmodf(2 - fmodf(XoffSet, 1), 2)); j++)
 		{
-			int tx = Map[int(i)][int(j + XoffSet) * 3] - 'a';
-			int ty = Map[int(i)][int(j + XoffSet) * 3 + 1] - 'a';
+			int tx = Map[int(i + YoffSet)][int(j + XoffSet) * 3] - 'a';
+			int ty = Map[int(i + YoffSet)][int(j + XoffSet) * 3 + 1] - 'a';
 			float precX = 1, precY = 1;
 			int startX = 0, startY = 0;
-			int posX = (j * 32) - int(fmodf(XoffSet, 1) * 32), posY = (i * 32);
+			int posX = (j * 32) - int(fmodf(XoffSet, 1) * 32), posY = (i * 32) - int(fmodf(YoffSet, 1) * 32);
 			if (j == 0)
 				startX = int(fmodf(XoffSet, 1) * 32),posX = 0,precX = 1.0f - fmodf(XoffSet,1);
 			if (j == (ScreenWidth / 32 + int(fmodf(2 - fmodf(XoffSet, 1), 2))) - 1)
 				precX = (fmodf(XoffSet,1) == 0.0f) ? 1.0f : fmodf(XoffSet, 1);
+			if (i == 0)
+				startY = int(fmodf(YoffSet, 1) * 32), posY = 0, precY = 1.0f - fmodf(YoffSet, 1);
+			if (i == (ScreenHeight / 32 + int(fmodf(2 - fmodf(YoffSet, 1), 2))) - 1)
+				precY = (fmodf(YoffSet, 1) == 0.0f) ? 1.0f : fmodf(YoffSet, 1);
+
 			DrawTile(tx, ty, screen, posX, posY,precY,startY,precX,startX);
 		}
 	}
-	/*int YmapStart = (int)posY;
-	int XmapStart = (int)posX;
-	float Yprec = Tmpl8::Clamp(fmodf(posY, 1), 0.0f, (float)(height - 16.0f));
-	float Xprec = Tmpl8::Clamp(fmodf(posX, 1), 0.0f, (float)(width / 3.0f - 25.0f));
-	for (int y = YmapStart; y <	Tmpl8::Clamp(YmapStart + 16, 16, height); y++)
-		for (int x = XmapStart; x < Tmpl8::Clamp(XmapStart + 25, 25,width/3); x++)
-		{
-			int tx = Map[y][(x) * 3] - 'a';
-			int ty = Map[y][(x) * 3 + 1] - 'a';
-			if (y == YmapStart)
-			{
-				if (x == XmapStart)
-				{
-					DrawTile(tx, ty, screen, 0, 0, 1, 32 * fmodf(Yprec, 1), 1, 32 * fmodf(Xprec, 1));
-					continue;
-				}
-				else if (x == XmapStart + 24) {
-					DrawTile(tx, ty, screen, ((x - XmapStart) * 32) - (32 * fmodf(Xprec, 1)), (y - YmapStart) * 32, 1, 32 * fmodf(Yprec, 1), 1, 0);
-					tx = Map[y][((x) % (width - 1)) * 3] - 'a';
-					ty = Map[y][((x) % (width - 1)) * 3 + 1] - 'a';
-					DrawTile(tx, ty, screen, ((x - XmapStart + 1) * 32) - (32 * fmodf(Xprec, 1)), (y - YmapStart) * 32, 1, 32 * fmodf(Yprec, 1), fmodf(Xprec, 1), 0);
-
-					continue;
-				}
-				else {
-					DrawTile(tx, ty, screen, ((x - XmapStart) * 32) - (32 * fmodf(Xprec, 1)), (y - YmapStart) * 32, 1, 32 * fmodf(Yprec, 1), 1, 0);
-					continue;
-				}
-			}
-			else if (x == XmapStart)
-			{
-				if (y == YmapStart + 15) {
-					DrawTile(tx, ty, screen, ((x - XmapStart) * 32) - (32 * fmodf(Xprec, 1)), (y - YmapStart) * 32 - (32 * fmodf(Yprec, 1)));
-					tx = Map[(y) % (height - 1)][(x) * 3] - 'a';
-					ty = Map[(y) % (height - 1)][(x) * 3 + 1] - 'a';
-					DrawTile(tx, ty, screen, ((x - XmapStart) * 32), (y - YmapStart + 1) * 32 - (32 * fmodf(Yprec, 1)), fmodf(Yprec, 1), 0, 1, 32 * fmodf(Xprec, 1));
-					continue;
-				}
-				else {
-					DrawTile(tx, ty, screen, (x - XmapStart) * 32, (y - YmapStart) * 32 - (32 * fmodf(Yprec, 1)), 1, 0, 1, 32 * fmodf(Xprec, 1));
-					continue;
-				}
-			}
-			DrawTile(tx, ty, screen, ((x - XmapStart) * 32) - (32 * fmodf(Xprec, 1)), (y - YmapStart) * 32 - (32 * fmodf(Yprec, 1)));
-			if (y == YmapStart + 15)
-			{
-				if (x == XmapStart + 24)
-				{
-					tx = Map[(y) % (height - 1)][((x + 1) % (width - 1)) * 3] - 'a';
-					ty = Map[(y) % (height - 1)][((x + 1) % (width - 1)) * 3 + 1] - 'a';
-					DrawTile(tx, ty, screen, ((x - XmapStart + 1) * 32) - (32 * fmodf(Xprec, 1)), ((y - YmapStart + 1) * 32) - (32 * fmodf(Yprec, 1)), fmodf(Yprec, 1), 0, fmodf(Xprec, 1), 0);
-					tx = Map[y][((x) % (width - 1)) * 3] - 'a';
-					ty = Map[y][((x) % (width - 1)) * 3 + 1] - 'a';
-					DrawTile(tx, ty, screen, (x - XmapStart + 1) * 32 - (32 * fmodf(Xprec, 1)), ((y - YmapStart) * 32) - (32 * fmodf(Yprec, 1)), 1, 0, fmodf(Xprec, 1), 0);
-					tx = Map[(y) % (height - 1)][((x)) * 3] - 'a';
-					ty = Map[(y) % (height - 1)][((x)) * 3 + 1] - 'a';
-					DrawTile(tx, ty, screen, (x - XmapStart) * 32 - (32 * fmodf(Xprec, 1)), ((y - YmapStart + 1) * 32) - (32 * fmodf(Yprec, 1)), fmodf(Yprec, 1), 0, 1, 0);
-
-					continue;
-				}
-				else
-				{
-					tx = Map[(y) % (height - 1)][(x) * 3] - 'a';
-					ty = Map[(y) % (height - 1)][(x) * 3 + 1] - 'a';
-					DrawTile(tx, ty, screen, (x - XmapStart) * 32 - (32 * fmodf(Xprec, 1)), ((y - YmapStart + 1) * 32) - (32 * fmodf(Yprec, 1)), fmodf(Yprec, 1), 0, 1, 0);
-				}
-			}
-			else if (x == XmapStart + 24)
-			{
-				tx = Map[y][((x + 1) % (width - 1)) * 3] - 'a';
-				ty = Map[y][((x + 1) % (width - 1)) * 3 + 1] - 'a';
-				DrawTile(tx, ty, screen, ((x - XmapStart + 1) * 32) - (32 * fmodf(Xprec, 1)), (y - YmapStart) * 32 - (32 * fmodf(Yprec, 1)), 1, 0, fmodf(Xprec, 1), 0);
-			}
-
-		}*/
 }

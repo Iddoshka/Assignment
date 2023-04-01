@@ -3,11 +3,12 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-constexpr float gravity = 0.5f;
+constexpr float gravity = 0.7f;
 constexpr float air_resistance = 0.005f;
-constexpr float ver_res = 1.0f;
-constexpr float friction = 0.02f;
-
+constexpr float ver_res = 2.0f;
+constexpr float friction = 0.01f;
+constexpr float jump_force = 10.0f;
+constexpr float speed = 0.2;
 
 Ball::Ball(float xIn, float yIn, int rIn) // initialzing the player with its sprite and the given coordinates and radius
 	:	ball_sprite(new Tmpl8::Surface("assets/ball.png"),1)
@@ -45,6 +46,7 @@ Tmpl8::vec2 Ball::checkCollision(Tmpl8::vec4 coll_obj, Tmpl8::vec2 coor)
 		closest = Tmpl8::vectorRectangleIntersection(pcord, coor, coll_obj);
 	}*/
 	return (coor - closest);
+
 }
 
 Tmpl8::vec2 Ball::linearFunc(Tmpl8::vec2 diff)
@@ -84,13 +86,15 @@ bool Ball::checkPosX(TileMaps map, Tmpl8::vec2 coor)
 void Ball::Drive(TileMaps &map)
 {
 	Tmpl8::vec2 newPos = coordinates;
-	float speed = 0.2;
 	if (GetAsyncKeyState(VK_LEFT))
 	{
 		newPos.x -= speed;
 		if (checkPosX(map , newPos))
 			return;
-		pcord.x += speed;
+		if (pcord.x < coordinates.x)
+			pcord.x += speed * 2;
+		else
+			pcord.x += speed;
 		dir.x = (pcord.x > coordinates.x) ? -1 : dir.x;
 
 	}
@@ -99,7 +103,10 @@ void Ball::Drive(TileMaps &map)
 		newPos.x += speed;
 		if (checkPosX(map, newPos))
 			return;
-		pcord.x -= speed;
+		if (pcord.x > coordinates.x)
+			pcord.x -= speed * 2;
+		else
+			pcord.x -= speed;
 		dir.x = (pcord.x < coordinates.x) ? 1 : dir.x;
 	}
 	
@@ -113,15 +120,15 @@ void Ball::verlet(TileMaps &map)
 	if (pcord.y < coordinates.y)
 		dir.y = 1;
 
-	velocity.x = Tmpl8::Clamp(coordinates.x - pcord.x,-(32.0f + r),32.0f + r) ,velocity.y = Tmpl8::Clamp(coordinates.y - pcord.y,-(32.0f + r), 32.0f + r);
+	velocity.x = Tmpl8::Clamp(coordinates.x - pcord.x,-(18.0f),18.0f) ,velocity.y = Tmpl8::Clamp(coordinates.y - pcord.y,-(18.0f), 18.0f);
 	
 	//velocity += acceleration;
 	// store previous position.
-	pcord.y = coordinates.y;
 	// Verlet integration
 	// checking if the ball is heading towards the left edge of the map or the right edge of the map, if so than canceling map scrolling
-	bool edge = ((map.getXoffSet() == 25.0f && velocity.x > 0) || (map.getXoffSet() == 0.0f && velocity.x < 0));
-	if (coordinates.x != ScreenWidth / 2 && !edge)
+	bool edgeX = ((map.getXoffSet() == (map.getWidth()/3.0f - 25.0f) && velocity.x > 0) || (map.getXoffSet() == 0.0f && velocity.x < 0));
+	bool edgeY = ((map.getYoffSet() == (map.getHeight() -  16.0f) && velocity.y > 0) || (map.getYoffSet() == 0.0f && velocity.y < 0));
+	if (coordinates.x != ScreenWidth / 2 && !edgeX)
 	{
 		if (((coordinates.x > ScreenWidth / 2) && (pcord.x <= ScreenWidth / 2)) || ((coordinates.x < ScreenWidth / 2) && (pcord.x >= ScreenWidth / 2)))
 		{ //if the ball has passed the center of the screen than I place him in the center and add the remaining velocity to the horizontal offset
@@ -136,7 +143,8 @@ void Ball::verlet(TileMaps &map)
 		}
 	}
 	else
-		if (edge)
+	{
+		if (edgeX)
 		{
 			pcord.x = coordinates.x;
 			coordinates.x += velocity.x;
@@ -145,19 +153,54 @@ void Ball::verlet(TileMaps &map)
 		{
 			map.setXoffSet(map.getXoffSet() + velocity.x / 32.0f);
 		}
-	coordinates.y += velocity.y;
+	}
+	if ((coordinates.y != (32.0f + r) && coordinates.y != ScreenHeight - (32.0f + r))  && !edgeY)
+	{
+		if (((coordinates.y > ScreenHeight - (32.0f + r)) && (pcord.y <= ScreenHeight - (32.0f + r))) && velocity.y > 0)
+		{ //if the ball has passed the center of the screen than I place him in the center and add the remaining velocity to the horizontal offset
+			map.setYoffSet(map.getYoffSet() + ((ScreenHeight - (32.0f + r)) - coordinates.y) / 32.0f);
+			coordinates.y = ScreenHeight - (32.0f + r);
+			pcord.y = coordinates.y - velocity.y;
+		}
+		else if (((coordinates.y < (32.0f + r)) && (pcord.y >= (32.0f + r))) && velocity.y < 0)
+		{
+			map.setYoffSet(map.getYoffSet() - (32.0f - coordinates.y) / 32.0f);
+			coordinates.y = (32.0f + r);
+			pcord.y = coordinates.y - velocity.y;
+		}
+		else
+		{
+			pcord.y = coordinates.y;
+			coordinates.y += velocity.y;
+		}
+	}
+	else
+	{
+		if (edgeY || (coordinates.y == (32.0f + r) && velocity.y > 0) || (coordinates.y == ScreenHeight - (32.0f + r) && velocity.y < 0))
+		{
+			pcord.y = coordinates.y;
+			coordinates.y += velocity.y;
+		}
+		else
+		{
+			map.setYoffSet(map.getYoffSet() + velocity.y / 32.0f);
+		}
+	}
 	//adding friction to the resistance force if the ball is touching any object
 	float resistance = (collision) ? air_resistance + (friction * abs(velocity.x)): air_resistance;
-	if (gravity_switch)
-		coordinates.y += gravity; // adding gravity to the vertical velocity
+	if (gravity_switch)// adding gravity to the vertical velocity
+		if (edgeY || (coordinates.y > (32.0f + r) && coordinates.y < ScreenHeight - (32.0f + r)))
+			coordinates.y += gravity;
+		else
+			map.setYoffSet(map.getYoffSet() + gravity / 32.0f);
 	else // adding resistance to the vertical velocity
 	{
-		if (pcord.y < coordinates.y)
+		if (velocity.y > 0)
 			pcord.y += ver_res;
-		if (pcord.y > coordinates.y)
+		else if (velocity.y < 0)
 			pcord.y -= ver_res;
 		//recalculating the vertical velocity
-		velocity.y = Tmpl8::Clamp(coordinates.y - pcord.y, -(32.0f + r), 32.0f + r);
+		velocity.y = Tmpl8::Clamp(coordinates.y - pcord.y, -(18.0f), 18.0f);
 	}
 
 	gravity_switch = true;
@@ -169,7 +212,7 @@ void Ball::verlet(TileMaps &map)
 		pcord.x -= resistance;
 
 	//recalculating the horizontal velocity
-	velocity.x = Tmpl8::Clamp(coordinates.x - pcord.x, -(32.0f + r), 32.0f + r);
+	velocity.x = Tmpl8::Clamp(coordinates.x - pcord.x, -(18.0f), 18.0f);
 
 	//if the resistnace is greater than the velocity then the velocity is equivelant to zero
 	if(abs(velocity.x) < resistance)
@@ -199,56 +242,79 @@ void Ball::verlet(TileMaps &map)
 
 void Ball::mapReact(Tmpl8::Surface* screen, TileMaps& map)
 {
-	for (auto a : map.getColliders())
+	Tmpl8::vec2 new_coor = coordinates;
+	std::vector<Tmpl8::vec4> objects[2] = {map.getColliders(), map.getJumpers() };
+	Tmpl8::vec2 newCord;
+	bool edgeX = ((map.getXoffSet() == (map.getWidth() / 3.0f - 25.0f) && velocity.x > 0) || (map.getXoffSet() == 0.0f && velocity.x < 0));
+	bool edgeY = ((map.getYoffSet() == (map.getHeight() - 16.0f) && velocity.y > 0) || (map.getYoffSet() == 0.0f && velocity.y < 0));
+
+	char object_type[2] = { 'C','J' };
+	for (int i = 0; i < objects->size() - 1; i++)
 	{
-		Tmpl8::vec2 pos = { coordinates.x + map.getXoffSet() * 32.0f , coordinates.y };
-		Tmpl8::vec2 diff = checkCollision(a, pos);
-		if (abs(diff.x) < 0.001)
-			diff.x = 0;
-		if (abs(diff.y) < 0.001)
-			diff.y = 0;
-		if (diff.length() > r)
+		for (auto a : objects[i])
 		{
-			continue;
-		}
-		bool edge = ((map.getXoffSet() == 25.0f && velocity.x > 0) || (map.getXoffSet() == 0.0f && velocity.x < 0)) || coordinates.x != ScreenWidth / 2;
-		if (diff.y > 0)
-			dir.y = 1, velocity.y *= -1;
-		if (diff.y < 0)
-			dir.y = -1, velocity.y *= -1;
-		if (diff.x < 0)
-			dir.x = -1, velocity.x *= -1;
-		if (diff.x > 0)
-			dir.x = 1, velocity.x *= -1;
-		Tmpl8::vec2 newCord;
-		if (diff.x != 0 && diff.y != 0)
-		{
-			coordinates = { coordinates.x + abs(diff.y) * dir.x,coordinates.y + abs(diff.x) * dir.y };
-			pcord = { coordinates.x + velocity.y * dir.x, coordinates.y + velocity.y * dir.y };
-		}
-		else
-		{
-			newCord = linearFunc(diff);
-			printf("new coordinate: (%f, %f)\n", newCord.x, newCord.y);
-			Tmpl8::vec2 dist(coordinates - newCord);
-			//if the resistnace is greater than the velocity then the velocity is equivelant to zero
-			if (abs(velocity.y) <= ver_res)
+			Tmpl8::vec2 pos = { new_coor.x + map.getXoffSet() * 32.0f , new_coor.y + map.getYoffSet() * 32.0f };
+			Tmpl8::vec2 diff = checkCollision(a, pos);
+			if (abs(diff.x) < 0.001)
+				diff.x = 0;
+			if (abs(diff.y) < 0.001)
+				diff.y = 0;
+			if (diff.length() > r)
 			{
-				coordinates.y = newCord.y;
-				velocity.y = 0;
+				continue;
 			}
-			else
-				coordinates.y = newCord.y + (abs(dist.y) * dir.y);
-			if (edge)
-				coordinates.x = newCord.x + (abs(dist.x) * dir.x);
-			else
-				map.setXoffSet(map.getXoffSet() + (abs(dist.x) * dir.x)/ 32.0f);
-			pcord = { coordinates.x - (abs(velocity.x) * dir.x) ,coordinates.y - velocity.y };
-			printf("coordinates: (%f, %f), Pcord: (%f, %f)\n", coordinates.x, coordinates.y ,pcord.x,pcord.y);
+			switch (object_type[i])
+			{
+			case 'C':
+				if (diff.y > 0)
+					dir.y = 1, velocity.y *= -1;
+				if (diff.y < 0)
+					dir.y = -1, velocity.y *= -1;
+				if (diff.x < 0)
+					dir.x = -1, velocity.x *= -1;
+				if (diff.x > 0)
+					dir.x = 1, velocity.x *= -1;
+				if (diff.x != 0 && diff.y != 0)
+				{
+					coordinates = { coordinates.x + abs(diff.y) * dir.x,coordinates.y + abs(diff.x) * dir.y };
+					pcord = { coordinates.x + velocity.y * dir.x, coordinates.y + velocity.y * dir.y };
+				}
+				else
+				{
+					newCord = linearFunc(diff);
+					printf("new coordinate: (%f, %f)\n", newCord.x, newCord.y);
+					Tmpl8::vec2 dist(coordinates - newCord);
+					//if the resistnace is greater than the velocity then the velocity is equivelant to zero
+					if (abs(velocity.y) <= ver_res)
+					{
+						coordinates.y = newCord.y;
+						velocity.y = 0;
+					}
+					else
+						coordinates.y = newCord.y + (abs(dist.y) * dir.y);
+					if (edgeX || coordinates.x != ScreenWidth/2)
+						coordinates.x = newCord.x + (abs(dist.x) * dir.x);
+					else
+						map.setXoffSet(map.getXoffSet() + (abs(dist.x) * dir.x) / 32.0f);
+					if (edgeY || (coordinates.y > (32.0f + r) && coordinates.y < ScreenHeight - (32.0f + r)))
+						coordinates.y = newCord.y + (abs(dist.y) * dir.y);
+					else
+						map.setYoffSet(map.getYoffSet() + (abs(dist.y) * dir.y) / 32.0f);
+					pcord = { coordinates.x - (abs(velocity.x) * dir.x) ,coordinates.y - velocity.y };
+					printf("coordinates: (%f, %f), Pcord: (%f, %f)\n", coordinates.x, coordinates.y, pcord.x, pcord.y);
+				}
+				collision = true;
+				// checking if there was a bottom collision so can cancel the gravity with normal force
+				if (diff.y != 0 && dir.y == -1)
+					gravity_switch = false;
+				break;
+			case 'J':
+				if (diff.x == 0)
+					pcord.y += jump_force;
+				break;
+			default:
+				break;
+			}
 		}
-		collision = true;
-		// checking if there was a bottom collision so can cancel the gravity with normal force
-		if (diff.y != 0 && dir.y == -1)
-			gravity_switch = false;
 	}
 }

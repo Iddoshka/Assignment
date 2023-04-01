@@ -12,6 +12,7 @@ class TileMaps
 	int height;
 	char** Map;
 	std::vector<Tmpl8::vec4> colliders;
+	std::vector<Tmpl8::vec4> jumpers;
 	Tmpl8::Surface* Tiles;
 
 public:
@@ -20,6 +21,7 @@ public:
 	void mapScroll(Tmpl8::Surface* screen);
 	char** getMap() { return Map; }
 	std::vector<Tmpl8::vec4> getColliders() { return colliders; }
+	std::vector<Tmpl8::vec4> getJumpers() { return jumpers; }
 	int getWidth() { return width; }
 	float getXoffSet() { return XoffSet; }
 	void setXoffSet(float xoff) {
