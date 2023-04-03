@@ -50,15 +50,30 @@ void TileMaps::setTile(char** mapAdd, int sizeI, int sizeJ, int startX, int star
 	}
 	setColliders(startX/3 * 32, startY * 32, (sizeJ / 3) * 32, sizeI * 32, sign);
 }
+
+void TileMaps::setTile(char** mapAdd, int sizeI, int sizeJ, int startX, int startY)
+{
+	startX *= 3;
+	for (int i = startY; i < sizeI + startY; i++)
+	{
+		for (int j = startX; j < sizeJ + startX; j++)
+		{
+			Map[i][j] = mapAdd[i - startY][j - startX];
+		}
+	}
+}
+
 void TileMaps::setTile(char* mapAdd, int sizeI, int startX, int startY, char sign)
 {
 	startX *= 3;
 	for (int j = startX; j < sizeI + startX; j++)
 	{
-		Map[startY][j] = mapAdd[(j - startX) % sizeof(&mapAdd)];
+		Map[startY][j] = mapAdd[j - startX];
 	}
 	setColliders(startX/3 * 32, startY * 32, sizeI / 3 * 32, 32, sign);
 }
+
+
 
 void TileMaps::setColliders(int strtX, int strtY, int length, int height, char sign)
 {

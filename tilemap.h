@@ -15,6 +15,8 @@ class TileMaps
 	std::vector<Tmpl8::vec4> jumpers;
 	Tmpl8::Surface* Tiles;
 
+	
+
 public:
 	TileMaps(char* TilesIn);
 	TileMaps(char* TilesIn, int heightIn, int widthtIn);
@@ -36,6 +38,8 @@ public:
 	int getHeight() { return height; }
 	void setTile(char** mapAdd, int sizeI, int sizeJ, int startX, int startY, char sign);
 	void setTile(char* mapAdd, int sizeI, int startX, int startY, char sign);
+	void setTile(char** mapAdd, int sizeI, int sizeJ, int startX, int startY);
+	void setMap(char** newMap) { Map = newMap; }
 	void setColliders(int strtX, int strtY, int length, int height, char sign);
 	void printMap();
 	void DrawTile(int tx, int ty, Tmpl8::Surface* screen, int x, int y);
