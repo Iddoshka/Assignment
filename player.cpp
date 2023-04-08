@@ -9,6 +9,7 @@ constexpr float ver_res = 2.0f;
 constexpr float friction = 0.01f;
 constexpr float jump_force = 10.0f;
 constexpr float speed = 0.2;
+bool stop = false;
 
 Ball::Ball(float xIn, float yIn, int rIn) // initialzing the player with its sprite and the given coordinates and radius
 	:	ball_sprite(new Tmpl8::Surface("assets/ball.png"),1)
@@ -50,8 +51,7 @@ Tmpl8::vec2 Ball::checkCollision(Tmpl8::vec4 coll_obj, Tmpl8::vec2 coor)
 }
 
 Tmpl8::vec2 Ball::linearFunc(Tmpl8::vec2 diff)
-{
-	
+{	
 	Tmpl8::vec2 fix = { fmodf(r - abs(diff.x),r), fmodf(r - abs(diff.y),r) };
 	if (coordinates.x == pcord.x)
 	{
@@ -67,6 +67,35 @@ Tmpl8::vec2 Ball::linearFunc(Tmpl8::vec2 diff)
 	float b = pcord.y - m * pcord.x;
 	Tmpl8::vec2 newCord = { ((coordinates.y + (fix.y * dir.y) - b) / m) + (fix.x * dir.x), ((coordinates.x + (fix.x * dir.x)) * m + b) + (fix.y * dir.y)};
 	return newCord;
+}
+
+Tmpl8::vec2 Ball::findContact(Tmpl8::vec2 diff)
+{
+	Tmpl8::vec2 obj_cord = coordinates - diff;
+	Tmpl8::vec2 cord0 = coordinates - obj_cord;
+	Tmpl8::vec2 pcord0 = pcord - obj_cord;
+	Tmpl8::vec2 d = { cord0.x - pcord0.x, cord0.y - pcord0.y };
+	float det = pcord0.x * cord0.y - cord0.x * pcord0.y;
+	float sqr_len = d.length() * d.length();
+	if ((r * r) * sqr_len - (det * det) < 0)
+	{
+		printf("no intersection!");
+		return cord0;
+	}
+	float aux = sqrtf((r * r) *  sqr_len - (det * det));
+	Tmpl8::vec2 new_cord1 = { (det * d.y + (d.y / abs(d.y)) * d.x * aux) / sqr_len,(-det * d.x + abs(d.y) * aux) / sqr_len };
+	Tmpl8::vec2 new_cord2 = { (det * d.y - (d.y / abs(d.y)) * d.x * aux) / sqr_len, (-det * d.x - abs(d.y) * aux) / sqr_len };
+	float dist1 = pow(new_cord1.x - pcord0.x, 2) + pow(new_cord1.y - pcord0.y, 2);
+	float dist2 = pow(new_cord2.x - pcord0.x, 2) + pow(new_cord2.y - pcord0.y, 2);
+	Tmpl8::vec2 new_cord = (dist1 > dist2) ? new_cord2 : new_cord1;
+
+	//calculating nre veloctiy
+	Tmpl8::vec2 norm = new_cord;
+	aux = (2 * norm.dot(velocity)) / pow(norm.length(),2);
+	Tmpl8::vec2 new_vel = (norm * aux) - velocity;
+	new_cord += obj_cord;
+	pcord = (new_cord) - new_vel;
+	return new_cord;
 }
 
 bool Ball::checkPosX(TileMaps map, Tmpl8::vec2 coor)
@@ -115,6 +144,8 @@ void Ball::Drive(TileMaps &map)
 
 void Ball::verlet(TileMaps &map)
 {
+	if (stop)
+		return;
 	if (pcord.y > coordinates.y)
 		dir.y = -1;
 	if (pcord.y < coordinates.y)
@@ -249,7 +280,7 @@ void Ball::mapReact(Tmpl8::Surface* screen, TileMaps& map)
 	bool edgeY = ((map.getYoffSet() == (map.getHeight() - 16.0f) && velocity.y > 0) || (map.getYoffSet() == 0.0f && velocity.y < 0));
 
 	char object_type[2] = { 'C','J' };
-	for (int i = 0; i < objects->size() - 1; i++)
+	for (int i = 0; i < sizeof(object_type); i++)
 	{
 		for (auto a : objects[i])
 		{
@@ -274,10 +305,13 @@ void Ball::mapReact(Tmpl8::Surface* screen, TileMaps& map)
 					dir.x = -1, velocity.x *= -1;
 				if (diff.x > 0)
 					dir.x = 1, velocity.x *= -1;
+
 				if (diff.x != 0 && diff.y != 0)
 				{
-					coordinates = { coordinates.x + abs(diff.y) * dir.x,coordinates.y + abs(diff.x) * dir.y };
-					pcord = { coordinates.x + velocity.y * dir.x, coordinates.y + velocity.y * dir.y };
+					newCord = findContact(diff);
+					coordinates = newCord;
+					//coordinates = { coordinates.x + abs(diff.x) * dir.x,coordinates.y + abs(diff.y) * dir.y };
+					//pcord = { coordinates.x + velocity.x * dir.x, coordinates.y + velocity.y * dir.y };
 				}
 				else
 				{
@@ -285,18 +319,16 @@ void Ball::mapReact(Tmpl8::Surface* screen, TileMaps& map)
 					printf("new coordinate: (%f, %f)\n", newCord.x, newCord.y);
 					Tmpl8::vec2 dist(coordinates - newCord);
 					//if the resistnace is greater than the velocity then the velocity is equivelant to zero
+					if (edgeX || coordinates.x != ScreenWidth/2)
+						coordinates.x = newCord.x + (abs(dist.x) * dir.x);
+					else
+						map.setXoffSet(map.getXoffSet() + (abs(dist.x) * dir.x) / 32.0f);
 					if (abs(velocity.y) <= ver_res)
 					{
 						coordinates.y = newCord.y;
 						velocity.y = 0;
 					}
-					else
-						coordinates.y = newCord.y + (abs(dist.y) * dir.y);
-					if (edgeX || coordinates.x != ScreenWidth/2)
-						coordinates.x = newCord.x + (abs(dist.x) * dir.x);
-					else
-						map.setXoffSet(map.getXoffSet() + (abs(dist.x) * dir.x) / 32.0f);
-					if (edgeY || (coordinates.y > (32.0f + r) && coordinates.y < ScreenHeight - (32.0f + r)))
+					else if (edgeY || (coordinates.y > (32.0f + r) && coordinates.y < ScreenHeight - (32.0f + r)))
 						coordinates.y = newCord.y + (abs(dist.y) * dir.y);
 					else
 						map.setYoffSet(map.getYoffSet() + (abs(dist.y) * dir.y) / 32.0f);

@@ -11,6 +11,8 @@
 constexpr float gravity = 0.5f;
 constexpr float mapHeight = ScreenHeight / 32.0f;
 constexpr float mapWidth = ScreenWidth / 32.0f;
+constexpr int player_start_X = 68;
+constexpr int player_start_Y = 300;
 namespace Tmpl8
 {
 
@@ -41,7 +43,7 @@ namespace Tmpl8
 		obs = new char* [tilemap.getHeight()];
 		for(int i = 0; i < tilemap.getHeight(); i++)
 			obs[i] = new char[tilemap.getWidth() + 1];
-		map_file.open("map.txt");
+		map_file.open("testmap.txt");
 		if (map_file.fail())
 			printf("didnt work");
 		for (int i = 1; i < tilemap.getHeight() + 1; i++)
@@ -50,9 +52,11 @@ namespace Tmpl8
 			strcpy(obs[i - 1], line.c_str());
 		}
 		map_file.close();
-		obj_file.open("objects.txt");
+		obj_file.open("testobjects.txt");
+		if (obj_file.fail())
+			printf("didnt work");
 		std::getline(obj_file, line);
-		for (int i = 1; i < 4; i++)
+		while (!obj_file.eof())
 		{
 			float a, b, c, d;
 			char sign;
@@ -66,45 +70,6 @@ namespace Tmpl8
 		setMapObjects(game_map_objects);
 		obj_file.close();
 		tilemap.setMap(obs);
-		//bottom side
-		/*for (int j = 0; j < tilemap.getWidth(); j += 3)
-		{
-			obs[0][j] = 'n', obs[0][j + 1] = 'e', obs[0][j + 2] = 'x';
-		}
-		tilemap.setTile(obs, 1, tilemap.getWidth(), 0, 15,'x');
-
-		//top side
-		char** first_obj;
-		first_obj = new char* [5];
-		for (int i = 0; i < 5; i++)
-		{
-			first_obj[i] = new char[43];
-		}
-		for(int i = 0; i< 5; i++)
-			if (i != 4)
-				first_obj[i] = { "maxmaxmaxmaxmaxmaxmaxmaxmaxmaxmaxmaxmaxrax" };
-			else
-				first_obj[i] = { "aexaexaexaexaexaexaexaexaexaexaexaexaexrbx" };
-		tilemap.setTile(first_obj, 5, 42, 0, 0, 'x');
-
-		//right side
-		for (int j = 0; j < tilemap.getHeight() - 2; j++)
-		{
-			obsV[j][0] = 'j', obsV[j][1] = 'd', obsV[j][2] = 'x';
-		}
-		tilemap.setTile(obsV, tilemap.getHeight() - 2,3, ((int)mapWidth) -1, 1, 'x');
-
-		//left side
-		for (int j = 0; j < tilemap.getHeight() - 2; j++)
-		{
-			obsV[j][0] = 'l', obsV[j][1] = 'f', obsV[j][2] = 'x';
-		}
-		tilemap.setTile(obsV, tilemap.getHeight() - 2, 3, 0, 1, 'x');
-
-		char ob[4] = "nex";
-		//tilemap.setTile(ob,3, 0, 7, 'x');
-		tilemap.setTile("idx", 3, 4, 15, 'j');
-		//tilemap.printMap();*/
 	}
 	
 	// -----------------------------------------------------------
@@ -126,7 +91,7 @@ namespace Tmpl8
 		}
 	}
 
-	Ball player(19, 280, 18);
+	Ball player(player_start_X, player_start_Y, 18);
 	// -----------------------------------------------------------
 	// Main application tick function
 	// -----------------------------------------------------------

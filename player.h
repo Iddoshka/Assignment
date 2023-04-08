@@ -21,6 +21,7 @@ class Ball
 	bool checkPosX(TileMaps map, Tmpl8::vec2 coor);
 	Tmpl8::vec2 checkCollision(Tmpl8::vec4 coll_obj, Tmpl8::vec2 coor);
 	Tmpl8::vec2 linearFunc(Tmpl8::vec2 diff);
+	Tmpl8::vec2 findContact(Tmpl8::vec2 diff);
 public:
 	Ball(float xIn, float yIn, int rIn);
 	void setX(float xIn) { coordinates.x = xIn; } // to change the x coordinate
