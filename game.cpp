@@ -19,14 +19,39 @@ namespace Tmpl8
 	std::ifstream map_file; 
 	std::ifstream obj_file;
 
-	TileMaps tilemap("assets/nc2tiles.png", mapHeight , mapWidth * 3);
+	TileMaps tilemap("assets/nc2tiles.png", mapHeight , mapWidth * 6);
 	struct object {
 		Tmpl8::vec4 obj;
 		char sign;
 	};
 
 	std::vector<object> game_map_objects;
-
+	std::vector<char*> maps = { "testmap.txt","testmap2.txt" };
+	void openMap(std::vector<char*> maps)
+	{
+		char** obs;
+		obs = new char* [tilemap.getHeight()];
+		for (int i = 0; i < tilemap.getHeight(); i++)
+			obs[i] = new char[tilemap.getWidth() + 1];
+		std::string line;
+		std::vector<std::string> string_map;
+		string_map.resize(tilemap.getHeight());
+		for (auto a : maps)
+		{
+			map_file.open(a);
+			if (map_file.fail())
+				printf("didnt work");
+			for (int i = 0; i < tilemap.getHeight(); i++)
+			{
+				std::getline(map_file, line);
+				string_map[i].append(line);
+			}
+			map_file.close();
+		}
+		for (int i = 0; i < tilemap.getHeight(); i++)
+			strcpy(obs[i], string_map[i].c_str());
+		tilemap.setMap(obs);
+	}
 
 	void setMapObjects(std::vector<object> map_objects)
 	{
@@ -39,19 +64,13 @@ namespace Tmpl8
 	void Game::Init()
 	{
 		char** obs;
-		std::string line;
 		obs = new char* [tilemap.getHeight()];
-		for(int i = 0; i < tilemap.getHeight(); i++)
+		for (int i = 0; i < tilemap.getHeight(); i++)
 			obs[i] = new char[tilemap.getWidth() + 1];
-		map_file.open("testmap.txt");
-		if (map_file.fail())
-			printf("didnt work");
-		for (int i = 1; i < tilemap.getHeight() + 1; i++)
-		{
-			std::getline(map_file, line);
-			strcpy(obs[i - 1], line.c_str());
-		}
-		map_file.close();
+		std::string line;
+		openMap(maps);
+		
+		tilemap.printMap();
 		obj_file.open("testobjects.txt");
 		if (obj_file.fail())
 			printf("didnt work");
@@ -69,7 +88,7 @@ namespace Tmpl8
 		}
 		setMapObjects(game_map_objects);
 		obj_file.close();
-		tilemap.setMap(obs);
+		
 	}
 	
 	// -----------------------------------------------------------
