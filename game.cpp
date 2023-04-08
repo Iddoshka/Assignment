@@ -11,7 +11,7 @@
 constexpr float gravity = 0.5f;
 constexpr float mapHeight = ScreenHeight / 32.0f;
 constexpr float mapWidth = ScreenWidth / 32.0f;
-constexpr int player_start_X = 68;
+constexpr int player_start_X = 300;
 constexpr int player_start_Y = 300;
 namespace Tmpl8
 {

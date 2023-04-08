@@ -36,18 +36,30 @@ void Ball::printBall(Tmpl8::Surface* screen)
 
 Tmpl8::vec2 Ball::checkCollision(Tmpl8::vec4 coll_obj, Tmpl8::vec2 coor)
 {
-	Tmpl8::vec2 tileCenter((coll_obj.x) + coll_obj.z / 2, (coll_obj.y) + coll_obj.w / 2);
-	Tmpl8::vec2 diff = coor - tileCenter;
-	Tmpl8::vec2 clamped;
-	clamped.x = Tmpl8::Clamp(diff.x, -coll_obj.z / 2.0f, coll_obj.z / 2.0f);
-	clamped.y = Tmpl8::Clamp(diff.y, -coll_obj.w / 2.0f, coll_obj.w / 2.0f);
-	Tmpl8::vec2 closest = tileCenter + clamped;
-	/*if (closest.x == coor.x && closest.y == coor.y)
-	{
-		closest = Tmpl8::vectorRectangleIntersection(pcord, coor, coll_obj);
-	}*/
-	return (coor - closest);
+	Tmpl8::vec2 closest;
 
+	for (int i = 0; i < 2; i++)
+	{
+		Tmpl8::vec2 tileCenter((coll_obj.x) + coll_obj.z / 2, (coll_obj.y) + coll_obj.w / 2);
+		Tmpl8::vec2 diff = coor - tileCenter;
+		Tmpl8::vec2 clamped;
+		clamped.x = Tmpl8::Clamp(diff.x, -coll_obj.z / 2.0f, coll_obj.z / 2.0f);
+		clamped.y = Tmpl8::Clamp(diff.y, -coll_obj.w / 2.0f, coll_obj.w / 2.0f);
+		closest = tileCenter + clamped;
+		/*if (closest.x == coor.x && closest.y == coor.y)
+		{
+			closest = Tmpl8::vectorRectangleIntersection(pcord, coor, coll_obj);
+		}*/
+		if (coor.x == closest.x && coor.y == closest.y)
+		{
+			float scale = r / velocity.length();
+			Tmpl8::vec2 comp = velocity * -scale;
+			coor += comp;
+		}
+		else
+			break;
+	}
+	return (coor - closest);
 }
 
 Tmpl8::vec2 Ball::linearFunc(Tmpl8::vec2 diff)
@@ -151,7 +163,7 @@ void Ball::verlet(TileMaps &map)
 	if (pcord.y < coordinates.y)
 		dir.y = 1;
 
-	velocity.x = Tmpl8::Clamp(coordinates.x - pcord.x,-(18.0f),18.0f) ,velocity.y = Tmpl8::Clamp(coordinates.y - pcord.y,-(18.0f), 18.0f);
+	velocity.x = Tmpl8::Clamp(coordinates.x - pcord.x,-(32.0f),32.0f) ,velocity.y = Tmpl8::Clamp(coordinates.y - pcord.y,-(32.0f), 32.0f);
 	
 	//velocity += acceleration;
 	// store previous position.
