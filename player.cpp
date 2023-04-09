@@ -105,8 +105,9 @@ Tmpl8::vec2 Ball::findContact(Tmpl8::vec2 diff)
 	Tmpl8::vec2 norm = new_cord;
 	aux = (2 * norm.dot(velocity)) / pow(norm.length(),2);
 	Tmpl8::vec2 new_vel = (norm * aux) - velocity;
+	printf("%f", new_vel.length());
 	new_cord += obj_cord;
-	pcord = (new_cord) - new_vel;
+	pcord = new_vel;
 	return new_cord;
 }
 
@@ -285,13 +286,14 @@ void Ball::verlet(TileMaps &map)
 
 void Ball::mapReact(Tmpl8::Surface* screen, TileMaps& map)
 {
+	float holding_vel = velocity.length();
 	Tmpl8::vec2 new_coor = coordinates;
-	std::vector<Tmpl8::vec4> objects[2] = {map.getColliders(), map.getJumpers() };
+	std::vector<Tmpl8::vec4> objects[3] = { map.getDeaths(), map.getColliders(), map.getJumpers()};
 	Tmpl8::vec2 newCord;
 	bool edgeX = ((map.getXoffSet() == (map.getWidth() / 3.0f - 25.0f) && velocity.x > 0) || (map.getXoffSet() == 0.0f && velocity.x < 0));
 	bool edgeY = ((map.getYoffSet() == (map.getHeight() - 16.0f) && velocity.y > 0) || (map.getYoffSet() == 0.0f && velocity.y < 0));
 
-	char object_type[2] = { 'C','J' };
+	char object_type[3] = { 'D', 'C','J'};
 	for (int i = 0; i < sizeof(object_type); i++)
 	{
 		for (auto a : objects[i])
@@ -321,14 +323,22 @@ void Ball::mapReact(Tmpl8::Surface* screen, TileMaps& map)
 				if (diff.x != 0 && diff.y != 0)
 				{
 					newCord = findContact(diff);
-					coordinates = newCord;
-					//coordinates = { coordinates.x + abs(diff.x) * dir.x,coordinates.y + abs(diff.y) * dir.y };
-					//pcord = { coordinates.x + velocity.x * dir.x, coordinates.y + velocity.y * dir.y };
+					Tmpl8::vec2 dist(coordinates - newCord);
+					if(edgeX || coordinates.x != ScreenWidth/2 )
+						coordinates.x = newCord.x;
+					else
+						map.setXoffSet(map.getXoffSet() + (abs(dist.x) * dir.x) / 32.0f);
+					if (abs(velocity.y) <= ver_res)
+						velocity.y = 0;
+					if(edgeY || (coordinates.y > (32.0f + r) && coordinates.y < ScreenHeight - (32.0f + r)))
+						coordinates.y = newCord.y;
+					else
+						map.setYoffSet(map.getYoffSet() + (abs(dist.y) * dir.y) / 32.0f);
+					pcord = coordinates - pcord;
 				}
 				else
 				{
 					newCord = linearFunc(diff);
-					printf("new coordinate: (%f, %f)\n", newCord.x, newCord.y);
 					Tmpl8::vec2 dist(coordinates - newCord);
 					//if the resistnace is greater than the velocity then the velocity is equivelant to zero
 					if (edgeX || coordinates.x != ScreenWidth/2)
@@ -344,8 +354,7 @@ void Ball::mapReact(Tmpl8::Surface* screen, TileMaps& map)
 						coordinates.y = newCord.y + (abs(dist.y) * dir.y);
 					else
 						map.setYoffSet(map.getYoffSet() + (abs(dist.y) * dir.y) / 32.0f);
-					pcord = { coordinates.x - (abs(velocity.x) * dir.x) ,coordinates.y - velocity.y };
-					printf("coordinates: (%f, %f), Pcord: (%f, %f)\n", coordinates.x, coordinates.y, pcord.x, pcord.y);
+					pcord = { coordinates.x - velocity.x ,coordinates.y - velocity.y };
 				}
 				collision = true;
 				// checking if there was a bottom collision so can cancel the gravity with normal force
@@ -356,9 +365,13 @@ void Ball::mapReact(Tmpl8::Surface* screen, TileMaps& map)
 				if (diff.x == 0)
 					pcord.y += jump_force;
 				break;
+			case 'D':
+				stop = true;
+				break;
 			default:
 				break;
 			}
 		}
 	}
+	
 }

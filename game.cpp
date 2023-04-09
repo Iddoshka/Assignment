@@ -11,15 +11,29 @@
 constexpr float gravity = 0.5f;
 constexpr float mapHeight = ScreenHeight / 32.0f;
 constexpr float mapWidth = ScreenWidth / 32.0f;
-constexpr int player_start_X = 300;
-constexpr int player_start_Y = 300;
+int player_start_X;
+int player_start_Y;
+int player_radius;
+int width_times;
+int height_times;
 namespace Tmpl8
 {
 
 	std::ifstream map_file; 
 	std::ifstream obj_file;
-
-	TileMaps tilemap("assets/nc2tiles.png", mapHeight , mapWidth * 6);
+	std::ifstream stat_file;
+	void statMap() 
+	{
+		std::vector<int*> stats = { &player_start_X,&player_start_Y,&player_radius,&width_times,&height_times };
+		stat_file.open("map_stats.txt");
+		std::string line;
+		for (auto a : stats)
+		{
+			std::getline(stat_file, line); //the stat line of the file
+			sscanf(line.c_str(), " = %i ", &a);
+		}
+		stat_file.close();
+	}
 	struct object {
 		Tmpl8::vec4 obj;
 		char sign;
@@ -63,6 +77,7 @@ namespace Tmpl8
 
 	void Game::Init()
 	{
+		
 		char** obs;
 		obs = new char* [tilemap.getHeight()];
 		for (int i = 0; i < tilemap.getHeight(); i++)
@@ -70,7 +85,6 @@ namespace Tmpl8
 		std::string line;
 		openMap(maps);
 		
-		tilemap.printMap();
 		obj_file.open("testobjects.txt");
 		if (obj_file.fail())
 			printf("didnt work");
@@ -90,7 +104,7 @@ namespace Tmpl8
 		obj_file.close();
 		
 	}
-	
+	TileMaps tilemap("assets/nc2tiles.png", mapHeight* height_times, mapWidth * 3 * width_times);
 	// -----------------------------------------------------------
 	// Close down application
 	// -----------------------------------------------------------
@@ -110,7 +124,7 @@ namespace Tmpl8
 		}
 	}
 
-	Ball player(player_start_X, player_start_Y, 18);
+	Ball player(player_start_X, player_start_Y, player_radius);
 	// -----------------------------------------------------------
 	// Main application tick function
 	// -----------------------------------------------------------

@@ -85,6 +85,9 @@ void TileMaps::setColliders(int strtX, int strtY, int length, int height, char s
 	case 'j':
 		jumpers.push_back(Tmpl8::vec4(strtX, strtY, length, height));
 		break;
+	case 'd':
+		deaths.push_back(Tmpl8::vec4(strtX, strtY, length, height));
+		break;
 	default:
 		break;
 	}
