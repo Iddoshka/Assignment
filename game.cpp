@@ -145,9 +145,13 @@ namespace Tmpl8
 		std::fstream time_file("best_time.txt");
 		double best_time;
 		time_file >> best_time;
-		if (best_time > elapsedTime)
-			time_file << elapsedTime;
 		time_file.close();
+		if (best_time > elapsedTime)
+		{
+			std::ofstream time_file("best_time.txt");
+			time_file << elapsedTime;
+			time_file.close();
+		}
 		time_file.open("master_time.txt");
 		time_file >> best_time;
 		if (best_time < elapsedTime)
