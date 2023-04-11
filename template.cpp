@@ -400,7 +400,7 @@ int main( int argc, char **argv )
 			}
 		}
 		SDL_UnlockTexture( frameBuffer );
-		SDL_RenderCopy( renderer, frameBuffer, NULL, NULL );
+		SDL_RenderCopyEx(renderer, frameBuffer, NULL, NULL, surface->GetAngle(), NULL, SDL_FLIP_NONE);
 		SDL_RenderPresent( renderer );
 	#endif
 		if (firstframe)

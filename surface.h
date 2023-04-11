@@ -37,6 +37,8 @@ inline Pixel SubBlend( Pixel a_Color1, Pixel a_Color2 )
 class Surface
 {
 	enum { OWNER = 1 };
+	double angle = 0;
+	char* a_file;
 public:
 	// constructor / destructor
 	Surface( int a_Width, int a_Height, Pixel* a_Buffer, int a_Pitch );
@@ -46,7 +48,10 @@ public:
 	// member data access
 	Pixel* GetBuffer() { return m_Buffer; }
 	void SetBuffer( Pixel* a_Buffer ) { m_Buffer = a_Buffer; }
+	void SetAngle(double new_angle) { angle = new_angle; }
 	int GetWidth() { return m_Width; }
+	double GetAngle() { return angle; }
+	char* GetFile() { return a_file; }
 	int GetHeight() { return m_Height; }
 	int GetPitch() { return m_Pitch; }
 	void SetPitch( int a_Pitch ) { m_Pitch = a_Pitch; }
@@ -59,6 +64,7 @@ public:
 	void Line( float x1, float y1, float x2, float y2, Pixel color );
 	void Plot( int x, int y, Pixel c );
 	void LoadImage( char* a_File );
+	void LoadImage(char* a_File, double angle);
 	void CopyTo( Surface* a_Dst, int a_X, int a_Y );
 	void BlendCopyTo( Surface* a_Dst, int a_X, int a_Y );
 	void ScaleColor( unsigned int a_Scale );
@@ -101,6 +107,7 @@ public:
 	// Methods
 	void Draw( Surface* a_Target, int a_X, int a_Y );
 	void DrawScaled( int a_X, int a_Y, int a_Width, int a_Height, Surface* a_Target );
+	void DrawScaled(int a_X, int a_Y, int a_Width, int a_Height, Surface* a_Target , bool angled);
 	void SetFlags( unsigned int a_Flags ) { m_Flags = a_Flags; }
 	void SetFrame( unsigned int a_Index ) { m_CurrentFrame = a_Index; }
 	unsigned int GetFlags() const { return m_Flags; }

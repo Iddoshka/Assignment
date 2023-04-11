@@ -48,16 +48,47 @@ Surface::Surface( char* a_File )
 	LoadImage( a_File );
 }
 
-void Surface::LoadImage( char* a_File )
+void Surface::LoadImage(char* a_File)
 {
+	a_file = a_File;
+	FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
+	fif = FreeImage_GetFileType(a_File, 0);
+	if (fif == FIF_UNKNOWN) fif = FreeImage_GetFIFFromFilename(a_File);
+	FIBITMAP* tmp = FreeImage_Load(fif, a_File);
+	FIBITMAP* dib = FreeImage_ConvertTo32Bits(tmp);
+	FreeImage_Unload(tmp);
+	m_Width = m_Pitch = FreeImage_GetWidth(dib);
+	m_Height = FreeImage_GetHeight(dib);
+	m_Buffer = (Pixel*)MALLOC64(m_Width * m_Height * sizeof(Pixel));
+	if (m_Buffer)
+	{
+		m_Flags = OWNER;
+		assert(m_Pitch != 0);
+		for (int y = 0; y < m_Height; y++)
+		{
+			if (m_Pitch != 0)
+			{
+				unsigned char* line = FreeImage_GetScanLine(dib, m_Height - 1 - y);
+				memcpy(m_Buffer + (y * m_Pitch), line, m_Width * sizeof(Pixel));
+			}
+		}
+	}
+	FreeImage_Unload(dib);
+}
+
+void Surface::LoadImage( char* a_File , double angle)
+{
+	a_file = a_File;
 	FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
 	fif = FreeImage_GetFileType( a_File, 0 );
 	if (fif == FIF_UNKNOWN) fif = FreeImage_GetFIFFromFilename( a_File );
 	FIBITMAP* tmp = FreeImage_Load( fif, a_File );
 	FIBITMAP* dib = FreeImage_ConvertTo32Bits( tmp );
-	FreeImage_Unload( tmp );
-	m_Width = m_Pitch = FreeImage_GetWidth( dib );
-	m_Height = FreeImage_GetHeight( dib );
+	FIBITMAP* angled = FreeImage_RotateEx(dib , angle, 0 , 0 , this->GetWidth() / 2.0f, this->GetHeight() / 2.0f,true);
+	FreeImage_Unload(tmp);
+	FreeImage_Unload( dib );
+	m_Width = m_Pitch = FreeImage_GetWidth( angled );
+	m_Height = FreeImage_GetHeight( angled );
 	m_Buffer = (Pixel*)MALLOC64( m_Width * m_Height * sizeof( Pixel ) );
     if (m_Buffer)
     {
@@ -67,12 +98,12 @@ void Surface::LoadImage( char* a_File )
         {
             if (m_Pitch != 0)
             {
-                unsigned char* line = FreeImage_GetScanLine(dib, m_Height - 1 - y);
+                unsigned char* line = FreeImage_GetScanLine(angled, m_Height - 1 - y);
                 memcpy( m_Buffer + (y * m_Pitch), line, m_Width * sizeof( Pixel ) );
             }
         }
     }
-	FreeImage_Unload( dib );
+	FreeImage_Unload( angled );
 }
 
 Surface::~Surface()
@@ -423,8 +454,24 @@ void Sprite::Draw( Surface* a_Target, int a_X, int a_Y )
 	}
 }
 
-void Sprite::DrawScaled( int a_X, int a_Y, int a_Width, int a_Height, Surface* a_Target )
+void Sprite::DrawScaled(int a_X, int a_Y, int a_Width, int a_Height, Surface* a_Target)
 {
+	if ((a_Width == 0) || (a_Height == 0)) return;
+	for (int x = 0; x < a_Width; x++) for (int y = 0; y < a_Height; y++)
+	{
+		int u = (int)((float)x * ((float)m_Width / (float)a_Width));
+		int v = (int)((float)y * ((float)m_Height / (float)a_Height));
+		Pixel color = GetBuffer()[u + v * m_Pitch];
+		if ((a_Y + y) < ScreenHeight && (a_X + x) < ScreenWidth && (a_X + x) > 0 && (a_Y + y) > 0)
+			if (color & 0xffffff) a_Target->GetBuffer()[a_X + x + ((a_Y + y) * a_Target->GetPitch())] = color;
+	}
+}
+void Sprite::DrawScaled( int a_X, int a_Y, int a_Width, int a_Height, Surface* a_Target, bool angled)
+{
+	this->GetSurface()->LoadImage(this->GetSurface()->GetFile(), this->GetSurface()->GetAngle());
+	m_Pitch = this->GetSurface()->GetWidth();
+	m_Width = this->GetSurface()->GetWidth();
+	m_Height = this->GetSurface()->GetHeight();
 	if ((a_Width == 0) || (a_Height == 0)) return;
 	for ( int x = 0; x < a_Width; x++ ) for ( int y = 0; y < a_Height; y++ )
 	{

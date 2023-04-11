@@ -2,7 +2,6 @@
 #include "surface.h"
 #include<windows.h>
 #include <cstdio> //printf
-#include"player.h"
 #include<iostream>
 #include<fstream>
 #include<string>
@@ -11,36 +10,42 @@
 constexpr float gravity = 0.5f;
 constexpr float mapHeight = ScreenHeight / 32.0f;
 constexpr float mapWidth = ScreenWidth / 32.0f;
-int player_start_X;
-int player_start_Y;
-int player_radius;
-int width_times;
-int height_times;
+constexpr float player_start_X = 19;
+constexpr float player_start_Y = 306;
 namespace Tmpl8
 {
+
+	void Game::switch_state()
+	{
+		switch (state_machine)
+		{
+		case menu:
+			state_machine = play;
+			break;
+		case play:
+			state_machine = stop;
+		case stop:
+			state_machine = play;
+		default:
+			break;
+		}
+	}
 
 	std::ifstream map_file; 
 	std::ifstream obj_file;
 	std::ifstream stat_file;
-	void statMap() 
-	{
-		std::vector<int*> stats = { &player_start_X,&player_start_Y,&player_radius,&width_times,&height_times };
-		stat_file.open("map_stats.txt");
-		std::string line;
-		for (auto a : stats)
-		{
-			std::getline(stat_file, line); //the stat line of the file
-			sscanf(line.c_str(), " = %i ", &a);
-		}
-		stat_file.close();
-	}
+	std::vector<char*> maps = { "map1.1.txt","map1.2.txt" };
+	std::vector<char*> objects_files = { "objects1.1.txt","objects1.2.txt" };
+
+	TileMaps tilemap("assets/nc2tiles.png", mapHeight , mapWidth * 3 * maps.size());
+
 	struct object {
 		Tmpl8::vec4 obj;
 		char sign;
 	};
 
 	std::vector<object> game_map_objects;
-	std::vector<char*> maps = { "testmap.txt","testmap2.txt" };
+	
 	void openMap(std::vector<char*> maps)
 	{
 		char** obs;
@@ -67,6 +72,16 @@ namespace Tmpl8
 		tilemap.setMap(obs);
 	}
 
+	void Game::reset(Ball player)
+	{
+		player.setPX(player_start_X);
+		player.setPY(player_start_Y);
+		player.setX(player_start_X);
+		player.setY(player_start_Y);
+		tilemap.setXoffSet(0);
+		tilemap.setYoffSet(0);
+	}
+
 	void setMapObjects(std::vector<object> map_objects)
 	{
 		for (auto a : map_objects)
@@ -75,41 +90,44 @@ namespace Tmpl8
 		}
 	}
 
-	void Game::Init()
+	void openObjects(std::vector<char*> objects)
 	{
-		
-		char** obs;
-		obs = new char* [tilemap.getHeight()];
-		for (int i = 0; i < tilemap.getHeight(); i++)
-			obs[i] = new char[tilemap.getWidth() + 1];
+		int count_files = 0;
 		std::string line;
-		openMap(maps);
-		
-		obj_file.open("testobjects.txt");
-		if (obj_file.fail())
-			printf("didnt work");
-		std::getline(obj_file, line);
-		while (!obj_file.eof())
+		for (auto a : objects_files)
 		{
-			float a, b, c, d;
-			char sign;
+			obj_file.open(a);
+			if (obj_file.fail())
+				printf("didnt work");
 			std::getline(obj_file, line);
-			object collider;
-			sscanf(line.c_str(), "%f / %f / %f / %f / %c", &a, &b, &c, &d, &sign);
-			collider.obj = Tmpl8::vec4(a * 32, b * 32, c * 32, d * 32);
-			collider.sign = sign;
-			game_map_objects.push_back(collider);
+			while (!obj_file.eof())
+			{
+				float a, b, c, d;
+				char sign;
+				std::getline(obj_file, line);
+				object collider;
+				sscanf(line.c_str(), "%f / %f / %f / %f / %c", &a, &b, &c, &d, &sign);
+				collider.obj = Tmpl8::vec4((a + count_files * mapWidth) * 32, b * 32, c * 32, d * 32);
+				collider.sign = sign;
+				game_map_objects.push_back(collider);
+			}
+			obj_file.close();
+			count_files += 1;
 		}
 		setMapObjects(game_map_objects);
-		obj_file.close();
-		
 	}
-	TileMaps tilemap("assets/nc2tiles.png", mapHeight* height_times, mapWidth * 3 * width_times);
+	void Game::Init()
+	{
+		openMap(maps);
+		openObjects(objects_files);
+	}
+	
 	// -----------------------------------------------------------
 	// Close down application
 	// -----------------------------------------------------------
 	void Game::Shutdown()
 	{
+			screen->Centre("YOU DIED!", ScreenHeight / 2, Tmpl8::RedMask);
 	}
 
 	void Game::printScreen(TileMaps map)
@@ -124,7 +142,8 @@ namespace Tmpl8
 		}
 	}
 
-	Ball player(player_start_X, player_start_Y, player_radius);
+	Ball player(player_start_X, player_start_Y, 18);
+	double angle = 0;
 	// -----------------------------------------------------------
 	// Main application tick function
 	// -----------------------------------------------------------
@@ -138,6 +157,7 @@ namespace Tmpl8
 		player.Drive(tilemap);
 		player.verlet(tilemap);
 		player.mapReact(screen,tilemap);
+		if (player.isdead()) Shutdown();
 		_sleep(25);
 	}
 };
