@@ -84,9 +84,9 @@ void Surface::LoadImage( char* a_File , double angle)
 	if (fif == FIF_UNKNOWN) fif = FreeImage_GetFIFFromFilename( a_File );
 	FIBITMAP* tmp = FreeImage_Load( fif, a_File );
 	FIBITMAP* dib = FreeImage_ConvertTo32Bits( tmp );
-	FIBITMAP* angled = FreeImage_RotateEx(dib , angle, 0 , 0 , this->GetWidth() / 2.0f, this->GetHeight() / 2.0f,true);
+	FIBITMAP* angled = FreeImage_RotateEx(dib , angle, 0 , 0 , m_Width / 2.0f, m_Height / 2.0f,true);
 	FreeImage_Unload(tmp);
-	FreeImage_Unload( dib );
+	
 	m_Width = m_Pitch = FreeImage_GetWidth( angled );
 	m_Height = FreeImage_GetHeight( angled );
 	m_Buffer = (Pixel*)MALLOC64( m_Width * m_Height * sizeof( Pixel ) );
@@ -103,6 +103,7 @@ void Surface::LoadImage( char* a_File , double angle)
             }
         }
     }
+	FreeImage_Unload(dib);
 	FreeImage_Unload( angled );
 }
 

@@ -9,7 +9,7 @@ constexpr float friction = 0.01f;
 constexpr float jump_force = 7.0f;
 constexpr float speed = 0.3;
 constexpr float MAX_SPEED = 18.0f;
-bool stop = false;
+
 
 Ball::Ball(float xIn, float yIn, int rIn) // initialzing the player with its sprite and the given coordinates and radius
 	:	ball_sprite(new Tmpl8::Surface("assets/ball.png"),1)
@@ -17,21 +17,17 @@ Ball::Ball(float xIn, float yIn, int rIn) // initialzing the player with its spr
 	coordinates.x = xIn, coordinates.y = yIn;
 	r = rIn;
 	pcord.x = xIn, pcord.y = yIn;
-	jumpAble = false;
 	collision = false;
 }
 void Ball::printBall(Tmpl8::Surface* screen)
 {
 	ball_sprite.DrawScaled(coordinates.x - r, coordinates.y - r, r * 2, r * 2, screen,true);
-	if (!jumpAble)
-	{
 		for (int i = 0; i < 64; i++)
 		{
 			float r1 = (float)i * Tmpl8::PI / 32, r2 = (float)(i + 1) * Tmpl8::PI / 32;
 			screen->Line(coordinates.x - r * sinf(r1), coordinates.y - r * cosf(r1),
-				coordinates.x - r * sinf(r2), coordinates.y - r * cosf(r2), 0x00ff00);
-		}
-	}
+				coordinates.x - r * sinf(r2), coordinates.y - r * cosf(r2), 0x84898b);
+		}// printing circumfrance of the ball
 }
 
 Tmpl8::vec2 Ball::checkCollision(Tmpl8::vec4 coll_obj, Tmpl8::vec2 coor)
@@ -103,7 +99,6 @@ Tmpl8::vec2 Ball::findContact(Tmpl8::vec2 diff)
 	Tmpl8::vec2 norm = new_cord;
 	aux = (2 * norm.dot(velocity)) / pow(norm.length(),2);
 	Tmpl8::vec2 new_vel = (norm * aux) - velocity;
-	printf("%f", new_vel.length());
 	new_cord += obj_cord;
 	pcord = { abs(new_vel.x) * dir.x, abs(new_vel.y) * dir.y };
 	
@@ -158,7 +153,7 @@ void Ball::Drive(TileMaps &map)
 
 void Ball::verlet(TileMaps &map)
 {
-	if (stop)
+	if (dead || won)
 		return;
 	if (pcord.y > coordinates.y)
 		dir.y = -1;
@@ -292,12 +287,12 @@ void Ball::mapReact(Tmpl8::Surface* screen, TileMaps& map)
 {
 	float holding_vel = velocity.length();
 	Tmpl8::vec2 new_coor = coordinates;
-	std::vector<Tmpl8::vec4> objects[3] = { map.getDeaths(), map.getColliders(), map.getJumpers()};
+	std::vector<Tmpl8::vec4> objects[4] = { map.getWin(), map.getDeaths(), map.getColliders(), map.getJumpers()};
 	Tmpl8::vec2 newCord;
 	bool edgeX = ((map.getXoffSet() == (map.getWidth() / 3.0f - 25.0f) && velocity.x > 0) || (map.getXoffSet() == 0.0f && velocity.x < 0));
 	bool edgeY = ((map.getYoffSet() == (map.getHeight() - 16.0f) && velocity.y > 0) || (map.getYoffSet() == 0.0f && velocity.y < 0));
 
-	char object_type[3] = { 'D', 'C','J'};
+	char object_type[4] = { 'W', 'D', 'C', 'J'};
 	for (int i = 0; i < sizeof(object_type); i++)
 	{
 		for (auto a : objects[i])
@@ -366,9 +361,10 @@ void Ball::mapReact(Tmpl8::Surface* screen, TileMaps& map)
 					pcord.y += jump_force;
 				break;
 			case 'D':
-				stop = true;
-				//screen->Centre("YOU DIED!", ScreenHeight / 2, Tmpl8::RedMask);
-				//died();
+				dead = true;
+				break;
+			case 'W':
+				won = true;
 				break;
 			default:
 				break;

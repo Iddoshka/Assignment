@@ -12,9 +12,9 @@ constexpr float mapHeight = ScreenHeight / 32.0f;
 constexpr float mapWidth = ScreenWidth / 32.0f;
 constexpr float player_start_X = 19;
 constexpr float player_start_Y = 306;
+uint32_t startTime = SDL_GetPerformanceCounter();
 namespace Tmpl8
 {
-
 	void Game::switch_state()
 	{
 		switch (state_machine)
@@ -24,8 +24,10 @@ namespace Tmpl8
 			break;
 		case play:
 			state_machine = stop;
+			break;
 		case stop:
 			state_machine = play;
+			break;
 		default:
 			break;
 		}
@@ -72,7 +74,7 @@ namespace Tmpl8
 		tilemap.setMap(obs);
 	}
 
-	void Game::reset(Ball player)
+	void Game::reset(Ball &player)
 	{
 		player.setPX(player_start_X);
 		player.setPY(player_start_Y);
@@ -127,7 +129,29 @@ namespace Tmpl8
 	// -----------------------------------------------------------
 	void Game::Shutdown()
 	{
-			screen->Centre("YOU DIED!", ScreenHeight / 2, Tmpl8::RedMask);
+		exit(1);
+	}
+
+	void Game::winingLine()
+	{
+		uint32_t currTime = SDL_GetPerformanceCounter();
+		double elapsedTime = static_cast<double>(
+			(currTime - startTime) / static_cast<double>(SDL_GetPerformanceFrequency())
+			);
+		std::string line = { "YOUR TIME WAS: " + std::to_string(elapsedTime) + "!" };
+		char* win_line = new char[line.size() + 1];
+		strcpy(win_line, line.c_str());
+		screen->Centre(win_line, 260, Tmpl8::GreenMask);
+		std::fstream time_file("best_time.txt");
+		double best_time;
+		time_file >> best_time;
+		if (best_time > elapsedTime)
+			time_file << elapsedTime;
+		time_file.close();
+		time_file.open("master_time.txt");
+		time_file >> best_time;
+		if (best_time < elapsedTime)
+			screen->Centre("YOU BEAT THE MASTER!", 268, Tmpl8::GreenMask);
 	}
 
 	void Game::printScreen(TileMaps map)
@@ -148,16 +172,52 @@ namespace Tmpl8
 	// Main application tick function
 	// -----------------------------------------------------------
 	void Game::Tick(float deltaTime)
-	{
-		// clear the graphics window
-		screen->Clear(0);
-		//printScreen(tilemap);
-		tilemap.mapScroll(screen);
-		player.printBall(screen);
-		player.Drive(tilemap);
-		player.verlet(tilemap);
-		player.mapReact(screen,tilemap);
-		if (player.isdead()) Shutdown();
+	{	
+		switch (state_machine)
+		{
+		case menu:
+			screen->Centre("PRESS ENTER TO START!", 256, Tmpl8::GreenMask);
+			if (GetAsyncKeyState(VK_RETURN))
+			{
+				switch_state();
+			}
+			break;
+		case play:
+			if (player.isdead())
+			{
+				_sleep(2000);
+				player.revive();
+			}
+			else if (player.victory())
+			{
+				_sleep(4000);
+				Shutdown();
+			}
+			// clear the graphics window
+			screen->Clear(0);
+			tilemap.mapScroll(screen);
+			player.printBall(screen);
+			player.Drive(tilemap);
+			player.verlet(tilemap);
+			player.mapReact(screen, tilemap);
+			if (player.isdead() || player.victory()) switch_state();
+			break;
+		case stop:
+			if (player.isdead())
+			{
+				screen->Centre("YOU DIED!", 256, Tmpl8::RedMask);
+				reset(player);
+			}
+			if (player.victory())
+			{
+				screen->Clear(0);
+				screen->Centre("YOU'VE WON!", 252, Tmpl8::GreenMask);
+				winingLine();
+			}
+			switch_state();
+		default:
+			break;
+		}
 		_sleep(25);
 	}
 };

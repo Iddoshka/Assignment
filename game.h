@@ -1,6 +1,7 @@
 #pragma once
 #include"tilemap.h"
 #include"player.h"
+#include"SDL.h"
 namespace Tmpl8 {
 
 enum  state
@@ -16,7 +17,8 @@ class Game
 public:
 	void SetTarget( Surface* surface ) { screen = surface; }
 	void Init();
-	void reset(Ball player);
+	void winingLine();
+	void reset(Ball &player);
 	void Shutdown();
 	void Tick( float deltaTime );
 	void printScreen(TileMaps map);
