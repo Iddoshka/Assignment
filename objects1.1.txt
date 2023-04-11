@@ -1,0 +1,11 @@
+strat_X / start_Y / length / height / sign
+0 / 0 / 14 / 7 / x // the upper left block					{   |	   }
+0 / 11 / 8 / 6 / x // the lower left block					{   |    }
+0 / 15 / 46 / 1 / x // the floor							{   |    }
+0 / 0 / 50 / 1 / x // the ceiling							{   |    }
+18 / 10 / 5 / 1 / x // the first upper right level 				{   |    }
+22 / 4 / 1 / 6 / x // the pillar conecting the upper right levels		{   |	   }
+13 / 6 / 3 / 1 / x // the upper right small middle level			{   |    }
+18 / 3 / 29 / 1 / x // the top most upper right level 			{   |    }
+14 / 15 / 1 / 1 / j // the first floor jumping block				{   V    }
+18 / 10 / 1 / 1 / j // the jumping block on the first upper right level	{ map 1.1}

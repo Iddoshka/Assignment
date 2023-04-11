@@ -1,0 +1,14 @@
+strat_X / start_Y / length / height / sign
+0 / 15 / 50 / 1 / x / bottom level
+0 / 0 / 50 / 1 / x / upper level
+0 / 1 / 1 / 15 / x / left pillar
+49 / 1 / 1 / 15 / x / right pillar
+6 / 12 / 1 / 1 / x
+12 / 12 / 1 / 1 / x
+18 / 12 / 1 / 1 / x 
+0/ 14 / 2 / 2 / x
+23 / 14 / 1 / 2 / x  
+4 / 15 / 1 / 1 / j 
+10 / 15 / 1 / 1 / j 
+16 / 15 / 1 / 1 / j 
+28 / 15 / 1 / 1 / j 
