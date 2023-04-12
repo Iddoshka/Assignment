@@ -362,10 +362,12 @@ void Ball::mapReact(Tmpl8::Surface* screen, TileMaps& map)
 					pcord.y += jump_force;
 				break;
 			case 'S':
-				if (diff.y != 0 && diff.x == 0)
-					pcord.y += slow_force *  -dir.y;
-				if (diff.x != 0 && diff.y == 0)
-					pcord.x += slow_force * -dir.x;
+				if ((diff.y != 0 && diff.x == 0) || (diff.x != 0 && diff.y > 0))
+					pcord.y = (dir.y == 1) ? Tmpl8::Min(coordinates.y - slow_force, pcord.y + slow_force) 
+					: Tmpl8::Max(coordinates.y, pcord.y - slow_force);
+				if ((diff.x != 0 && diff.y == 0) || (diff.x != 0 && diff.y > 0))
+					pcord.x = (dir.x == 1) ? Tmpl8::Min(coordinates.x - 0.2f, pcord.x + slow_force) 
+					: Tmpl8::Max(coordinates.x + 0.2f, pcord.x - slow_force);
 				break;
 			case 'D':
 				dead = true;

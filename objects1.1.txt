@@ -13,13 +13,19 @@ strat_X / start_Y / length / height / sign
 19 / 22 / 3 / 1 / x // mid block first right level				{   | mid}
 11 / 25 / 4 / 4 / x // mid block middle bottom big block			{   | mid}
 4 / 21 / 4 / 4 / x // mid block left middle big block				{   | mid}
-11 / 18 / 4 / 4 / x // mid block middle upper big block			{   | mid}
-0 / 16 / 1 / 16 / x // mid to bot block left pillar				{mid| bot}
+4 / 21 / 5 / 1 / x // mid block 1 tile block slow (left big block)	{   | mid}
+12 / 18 / 2 / 4 / x // mid block middle upper big block			{   | mid}
+0 / 16 / 1 / 32 / x // mid to bot block left pillar				{mid| bot}
+0 / 47 / 50 / 1 / x // bot block floor						{   | bot}
 21 / 28 / 1 / 3 / d // mid block first small death waterfall		{   | mid}
 12 / 22 / 2 / 3 / d // mid block first big death waterfall			{   | mid}
-5 / 25 / 2 / 3 / d // mid block second big death waterfall			{   | mid}
-23 / 27 / 2 / 1 / j // mid block first right block jump tiles		{   |	mid}
+5 / 25 / 2 / 6 / d // mid block second big death waterfall			{   | mid}
+22 / 21 / 1 / 1 / s // mid block 1 tile block slow				{   | mid}
+8 / 21 / 1 / 1 / s // mid block 1 tile block slow (left big block)	{   | mid}
+11 / 28 / 4 / 1 / s // mid block middle bottom big block bottom slower	{   | mid}
+14 / 25 / 1 / 4 / s // mid block middle bottom big block right slower	{   | mid}
+22 / 27 / 2 / 1 / j // mid block first right block jump tiles		{   |	mid}
 8 / 31 / 3 / 1 / j // mid block left big floor jump tile			{   | mid}
-10 / 25 / 1 / 1 / j // mid block big block jump tile				{   | mid}
+11 / 25 / 1 / 1 / j // mid block big block jump tile				{   | mid}
 14 / 15 / 1 / 1 / j // the first floor jumping block				{   V    }
 18 / 10 / 1 / 1 / j // the jumping block on the first upper right level	{ map 1.1}

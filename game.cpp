@@ -11,8 +11,9 @@ constexpr float gravity = 0.5f;
 constexpr float mapHeight = ScreenHeight / 32.0f;
 constexpr float mapWidth = ScreenWidth / 32.0f;
 constexpr float player_start_X = 19;
-constexpr float player_start_Y = 306;
-uint32_t startTime = SDL_GetPerformanceCounter();
+constexpr float player_start_Y = 320;
+double best_time;
+uint32_t startTime;
 namespace Tmpl8
 {
 	void Game::switch_state()
@@ -21,6 +22,7 @@ namespace Tmpl8
 		{
 		case menu:
 			state_machine = play;
+			startTime = SDL_GetPerformanceCounter();
 			break;
 		case play:
 			state_machine = stop;
@@ -39,7 +41,7 @@ namespace Tmpl8
 	std::vector<char*> maps = { "map1.1.txt","map1.2.txt" };
 	std::vector<char*> objects_files = { "objects1.1.txt","objects1.2.txt" };
 
-	TileMaps tilemap("assets/nc2tiles.png", mapHeight * 2 , mapWidth * 3 * maps.size());
+	TileMaps tilemap("assets/nc2tiles.png", mapHeight * 3 , mapWidth * 3 * maps.size());
 
 	struct object {
 		Tmpl8::vec4 obj;
@@ -120,6 +122,16 @@ namespace Tmpl8
 	}
 	void Game::Init()
 	{
+		std::ifstream time_file("best_time.txt");
+		time_file >> best_time;
+		if (best_time != 100000)
+		{
+			std::string line = { "YOUR BEST TIME WAS: " + std::to_string(best_time) + "!" };
+			char* win_line = new char[line.size() + 1];
+			strcpy(win_line, line.c_str());
+			screen->Centre(win_line, 264, Tmpl8::GreenMask);
+			screen->Centre("DO YOU FEEL YOU CAN DO BETTER?", 272, Tmpl8::GreenMask);
+		}
 		openMap(maps);
 		openObjects(objects_files);
 	}
@@ -143,7 +155,6 @@ namespace Tmpl8
 		strcpy(win_line, line.c_str());
 		screen->Centre(win_line, 260, Tmpl8::GreenMask);
 		std::fstream time_file("best_time.txt");
-		double best_time;
 		time_file >> best_time;
 		time_file.close();
 		if (best_time > elapsedTime)
