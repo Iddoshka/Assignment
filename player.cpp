@@ -7,6 +7,7 @@ constexpr float air_resistance = 0.005f;
 constexpr float ver_res = 2.0f;
 constexpr float friction = 0.01f;
 constexpr float jump_force = 7.0f;
+constexpr float slow_force = 4.0f;
 constexpr float speed = 0.3;
 constexpr float MAX_SPEED = 18.0f;
 
@@ -108,7 +109,7 @@ Tmpl8::vec2 Ball::findContact(Tmpl8::vec2 diff)
 
 bool Ball::checkPosX(TileMaps map, Tmpl8::vec2 coor)
 {
-	coor = { coor.x + map.getXoffSet() * 32, coor.y + map.getYoffSet() };
+	coor = { coor.x + map.getXoffSet() * 32.0f, coor.y + map.getYoffSet() *32.0f};
 	for (auto a : map.getColliders())
 	{
 		Tmpl8::vec2 diff = checkCollision(a, coor);
@@ -195,13 +196,13 @@ void Ball::verlet(TileMaps &map)
 	}
 	if ((coordinates.y != (32.0f + r) && coordinates.y != ScreenHeight - (32.0f + r))  && !edgeY)
 	{
-		if (((coordinates.y > ScreenHeight - (32.0f + r)) && (pcord.y <= ScreenHeight - (32.0f + r))) && velocity.y > 0)
+		if (((coordinates.y > ScreenHeight - (32.0f + r)) && (pcord.y < ScreenHeight - (32.0f + r))) && velocity.y > 0)
 		{ //if the ball has passed the center of the screen than I place him in the center and add the remaining velocity to the horizontal offset
 			map.setYoffSet(map.getYoffSet() + ((ScreenHeight - (32.0f + r)) - coordinates.y) / 32.0f);
 			coordinates.y = ScreenHeight - (32.0f + r);
 			pcord.y = coordinates.y - velocity.y;
 		}
-		else if (((coordinates.y < (32.0f + r)) && (pcord.y >= (32.0f + r))) && velocity.y < 0)
+		else if (((coordinates.y < (32.0f + r)) && (pcord.y > (32.0f + r))) && velocity.y < 0)
 		{
 			map.setYoffSet(map.getYoffSet() - (32.0f - coordinates.y) / 32.0f);
 			coordinates.y = (32.0f + r);
@@ -228,7 +229,7 @@ void Ball::verlet(TileMaps &map)
 	//adding friction to the resistance force if the ball is touching any object
 	float resistance = (collision) ? air_resistance + (friction * abs(velocity.x)): air_resistance;
 	if (gravity_switch)// adding gravity to the vertical velocity
-		if (edgeY || (coordinates.y > (32.0f + r) && coordinates.y < ScreenHeight - (32.0f + r)))
+		if (edgeY || (coordinates.y != (32.0f + r) && coordinates.y != ScreenHeight - (32.0f + r)))
 			coordinates.y += gravity;
 		else
 			map.setYoffSet(map.getYoffSet() + gravity / 32.0f);
@@ -287,12 +288,12 @@ void Ball::mapReact(Tmpl8::Surface* screen, TileMaps& map)
 {
 	float holding_vel = velocity.length();
 	Tmpl8::vec2 new_coor = coordinates;
-	std::vector<Tmpl8::vec4> objects[4] = { map.getWin(), map.getDeaths(), map.getColliders(), map.getJumpers()};
+	std::vector<Tmpl8::vec4> objects[5] = { map.getWin(), map.getDeaths(), map.getColliders(), map.getSlowers(), map.getJumpers()};
 	Tmpl8::vec2 newCord;
 	bool edgeX = ((map.getXoffSet() == (map.getWidth() / 3.0f - 25.0f) && velocity.x > 0) || (map.getXoffSet() == 0.0f && velocity.x < 0));
 	bool edgeY = ((map.getYoffSet() == (map.getHeight() - 16.0f) && velocity.y > 0) || (map.getYoffSet() == 0.0f && velocity.y < 0));
 
-	char object_type[4] = { 'W', 'D', 'C', 'J'};
+	char object_type[5] = { 'W', 'D', 'C', 'S', 'J'};
 	for (int i = 0; i < sizeof(object_type); i++)
 	{
 		for (auto a : objects[i])
@@ -344,7 +345,7 @@ void Ball::mapReact(Tmpl8::Surface* screen, TileMaps& map)
 						map.setXoffSet(map.getXoffSet() + (abs(dist.x) * dir.x) / 32.0f);
 					if (abs(velocity.y) <= ver_res)
 						velocity.y = 0;
-					if (edgeY || (coordinates.y > (32.0f + r) && coordinates.y < ScreenHeight - (32.0f + r)))
+					if (edgeY || (coordinates.y != (32.0f + r) && coordinates.y != ScreenHeight - (32.0f + r)))
 						coordinates.y = newCord.y + (abs(dist.y) * dir.y);
 					else
 						map.setYoffSet(map.getYoffSet() + (abs(dist.y) * dir.y) / 32.0f);
@@ -359,6 +360,12 @@ void Ball::mapReact(Tmpl8::Surface* screen, TileMaps& map)
 			case 'J':
 				if (diff.y < 0)
 					pcord.y += jump_force;
+				break;
+			case 'S':
+				if (diff.y != 0 && diff.x == 0)
+					pcord.y += slow_force *  -dir.y;
+				if (diff.x != 0 && diff.y == 0)
+					pcord.x += slow_force * -dir.x;
 				break;
 			case 'D':
 				dead = true;

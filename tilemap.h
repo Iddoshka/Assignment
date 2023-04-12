@@ -13,6 +13,7 @@ class TileMaps
 	char** Map;
 	std::vector<Tmpl8::vec4> colliders;
 	std::vector<Tmpl8::vec4> jumpers;
+	std::vector<Tmpl8::vec4> slowers;
 	std::vector<Tmpl8::vec4> deaths;
 	std::vector<Tmpl8::vec4> win;
 	Tmpl8::Surface* Tiles;
@@ -26,6 +27,7 @@ public:
 	char** getMap() { return Map; }
 	std::vector<Tmpl8::vec4> getColliders() { return colliders; }
 	std::vector<Tmpl8::vec4> getJumpers() { return jumpers; }
+	std::vector<Tmpl8::vec4> getSlowers() { return slowers; }
 	std::vector<Tmpl8::vec4> getDeaths() { return deaths; }
 	std::vector<Tmpl8::vec4> getWin() { return win; }
 	int getWidth() { return width; }

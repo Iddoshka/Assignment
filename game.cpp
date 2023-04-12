@@ -39,7 +39,7 @@ namespace Tmpl8
 	std::vector<char*> maps = { "map1.1.txt","map1.2.txt" };
 	std::vector<char*> objects_files = { "objects1.1.txt","objects1.2.txt" };
 
-	TileMaps tilemap("assets/nc2tiles.png", mapHeight , mapWidth * 3 * maps.size());
+	TileMaps tilemap("assets/nc2tiles.png", mapHeight * 2 , mapWidth * 3 * maps.size());
 
 	struct object {
 		Tmpl8::vec4 obj;

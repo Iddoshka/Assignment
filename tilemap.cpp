@@ -88,6 +88,9 @@ void TileMaps::setColliders(int strtX, int strtY, int length, int height, char s
 	case 'd':
 		deaths.push_back(Tmpl8::vec4(strtX, strtY, length, height));
 		break;
+	case 's':
+		slowers.push_back(Tmpl8::vec4(strtX, strtY, length, height));
+		break;
 	case 'w':
 		win.push_back(Tmpl8::vec4(strtX, strtY, length, height));
 		break;
