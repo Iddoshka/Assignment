@@ -5,11 +5,6 @@ VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tmpl_2019-08", "tmpl_2019-08.vcxproj", "{D8FE2186-4BF0-4B89-913F-6C26818E5AC5}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{688EC3FD-A45F-4215-AC34-4220E299F7E4}"
-	ProjectSection(SolutionItems) = preProject
-		map.txt = map.txt
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32

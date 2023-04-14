@@ -18,6 +18,28 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="world\best_time.txt" />
+    <Text Include="world\map1.1.txt" />
+    <Text Include="world\map1.2.txt" />
+    <Text Include="world\master_time.txt" />
+    <Text Include="world\objects1.1.txt" />
+    <Text Include="world\objects1.2.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\game.cpp" />
+    <ClCompile Include="src\player.cpp" />
+    <ClCompile Include="src\surface.cpp" />
+    <ClCompile Include="src\template.cpp" />
+    <ClCompile Include="src\tilemap.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\game.h" />
+    <ClInclude Include="src\player.h" />
+    <ClInclude Include="src\surface.h" />
+    <ClInclude Include="src\template.h" />
+    <ClInclude Include="src\tilemap.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{D8FE2186-4BF0-4B89-913F-6C26818E5AC5}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -221,24 +243,6 @@
       </DataExecutionPrevention>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="game.cpp" />
-    <ClCompile Include="tilemap.cpp" />
-    <ClCompile Include="player.cpp" />
-    <ClCompile Include="surface.cpp" />
-    <ClCompile Include="template.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="game.h" />
-    <ClInclude Include="tilemap.h" />
-    <ClInclude Include="player.h" />
-    <ClInclude Include="surface.h" />
-    <ClInclude Include="template.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="map.txt" />
-    <Text Include="_readme.txt" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -1,36 +1,68 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="game.cpp" />
-    <ClCompile Include="surface.cpp">
-      <Filter>template code</Filter>
-    </ClCompile>
-    <ClCompile Include="template.cpp">
-      <Filter>template code</Filter>
-    </ClCompile>
-    <ClCompile Include="player.cpp" />
-    <ClCompile Include="tilemap.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="game.h" />
-    <ClInclude Include="surface.h">
-      <Filter>template code</Filter>
-    </ClInclude>
-    <ClInclude Include="template.h">
-      <Filter>template code</Filter>
-    </ClInclude>
-    <ClInclude Include="player.h" />
-    <ClInclude Include="tilemap.h" />
-  </ItemGroup>
-  <ItemGroup>
     <Filter Include="template code">
       <UniqueIdentifier>{bf32dd6e-4be7-4889-8ac6-49e7ee163c40}</UniqueIdentifier>
     </Filter>
+    <Filter Include="world">
+      <UniqueIdentifier>{e4fe6877-709e-4c78-8d4e-3e10489e9fe2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{f7e9a089-a26b-4690-a26a-c0f372173b4f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="_readme.txt">
-      <Filter>template code</Filter>
+    <Text Include="world\objects1.2.txt">
+      <Filter>world</Filter>
     </Text>
-    <Text Include="map.txt" />
+    <Text Include="world\map1.1.txt">
+      <Filter>world</Filter>
+    </Text>
+    <Text Include="world\map1.2.txt">
+      <Filter>world</Filter>
+    </Text>
+    <Text Include="world\master_time.txt">
+      <Filter>world</Filter>
+    </Text>
+    <Text Include="world\objects1.1.txt">
+      <Filter>world</Filter>
+    </Text>
+    <Text Include="world\best_time.txt">
+      <Filter>world</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\surface.cpp">
+      <Filter>template code</Filter>
+    </ClCompile>
+    <ClCompile Include="src\template.cpp">
+      <Filter>template code</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\player.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tilemap.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\surface.h">
+      <Filter>template code</Filter>
+    </ClInclude>
+    <ClInclude Include="src\template.h">
+      <Filter>template code</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tilemap.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\player.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
