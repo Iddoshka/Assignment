@@ -9,21 +9,6 @@
 //this class will be for the player ball
 class Ball
 {
-	Tmpl8::Sprite ball_sprite; //the sprite will be of the ping ball from the assets folder
-	Tmpl8::vec2 coordinates; //for the players coordinates
-	Tmpl8::vec2 dir = 1; //players direction, 1 is towards the max width or height, -1 is towards the zero value of the axis
-	bool won = false; // true if the ball hits a win tile
-	Tmpl8::vec2 pcord; //here will be saved the previous coordinates(px and py)
-	Tmpl8::vec2 velocity = 0.0f;
-	int r; // the balls radius
-	bool collision; // collision var if the ball collides with any object
-	double angle = 0; // ball angle
-	bool dead = false; // true if the ball hits a death tile
-
-	bool checkPosX(TileMaps map, Tmpl8::vec2 coor); // checking horizontal collision for the drive function
-	Tmpl8::vec2 checkCollision(Tmpl8::vec4 coll_obj, Tmpl8::vec2 coor); // collision function between player and any AABB objects
-	Tmpl8::vec2 linearFunc(Tmpl8::vec2 diff); // correction function for non-corner collisions
-	Tmpl8::vec2 findContact(Tmpl8::vec2 diff);// correction function for corner collisions
 public:
 	Ball(float xIn, float yIn, int rIn);
 	void setX(float xIn) { coordinates.x = xIn; } // to change the x coordinate
@@ -39,4 +24,25 @@ public:
 	void revive() { dead = false; }
 	bool isdead() { return dead; }
 	bool victory() { return won; }
+
+	void positioningX(TileMaps &map);
+	void positioningY(TileMaps& map, bool edgeY);
+	void fixCollision(TileMaps& map, Tmpl8::vec2 new_cord);
+	void velocityCalc(); // calculates the velocity
+private:
+	Tmpl8::Sprite ball_sprite; //the sprite will be of the ping ball from the assets folder
+	Tmpl8::vec2 coordinates; //for the players coordinates
+	Tmpl8::vec2 dir = 1; //players direction, 1 is towards the max width or height, -1 is towards the zero value of the axis
+	Tmpl8::vec2 pcord; //here will be saved the previous coordinates(px and py)
+	Tmpl8::vec2 velocity = 0.0f;
+	int r; // the balls radius
+	double angle = 0; // ball angle
+	bool won = false; // true if the ball hits a win tile
+	bool collision; // collision var if the ball collides with any object
+	bool dead = false; // true if the ball hits a death tile
+
+	bool checkCollisionX(TileMaps map, Tmpl8::vec2 coor); // checking horizontal collision for the drive function
+	Tmpl8::vec2 checkCollision(Tmpl8::vec4 coll_obj, Tmpl8::vec2 coor); // collision function between player and any AABB objects
+	Tmpl8::vec2 linearFunc(Tmpl8::vec2 diff); // correction function for non-corner collisions
+	Tmpl8::vec2 findContact(Tmpl8::vec2 diff);// correction function for corner collisions
 };

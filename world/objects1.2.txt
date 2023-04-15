@@ -10,6 +10,7 @@ strat_X / start_Y / length / height / sign
 16 / 26 / 3 / 1 / x // mid block right mid level				{    |mid}
 3 / 31 / 16 / 1 / d // mid block water death					{    |mid}
 0 / 23 / 6 / 1 / s // mid block slow impact left big block			{    |mid}
+24 / 0 / 1 / 32 / s // top block right pillar slow				{top |mid}
 3 / 28 / 1 / 1 / j // mid block left level jump tile				{    |mid}
 20 / 31 / 1 / 1 / j // mid block first jump tile				{    |mid}
 16 / 26 / 1 / 1 / j // mid block right level jump tile			{    |mid}

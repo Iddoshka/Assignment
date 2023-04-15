@@ -24,16 +24,16 @@ TileMaps::TileMaps(char* TilesIn)
 {// initializing the map buffer to be a black screen with the width and height of the screen
 	XoffSet = 0;
 	YoffSet = 0;
-	height = ScreenHeight / 32;
-	width = ScreenWidth / 32;
+	height = ScreenHeight / TileLength;
+	width = ScreenWidth / TileLength;
 	Map = new char* [height];
 	for (int i = 0; i < height; i++)
 	{
 		Map[i] = new char[width];
 		for (int j = 0; j < width; j += 3)
 		{
-			Map[i][j] = 'm';
-			Map[i][j + 1] = 'a';
+			Map[i][j] = 'p';
+			Map[i][j + 1] = 'f';
 			Map[i][j + 2] = ' ';
 		}
 	}
@@ -50,7 +50,7 @@ void TileMaps::setTile(char** mapAdd, int sizeI, int sizeJ, int startX, int star
 			Map[i][j] = mapAdd[i - startY][j - startX];
 		}
 	}
-	setColliders(startX/3 * 32, startY * 32, (sizeJ / 3) * 32, sizeI * 32, sign);
+	setColliders((float)(startX / 3 * TileLength), (float)(startY * TileLength), (float)((sizeJ / 3) * TileLength), (float)(sizeI * TileLength), sign);
 }
 
 void TileMaps::setTile(char** mapAdd, int sizeI, int sizeJ, int startX, int startY)
@@ -75,12 +75,12 @@ void TileMaps::setTile(char* mapAdd, int sizeI, int startX, int startY, char sig
 	{
 		Map[startY][j] = mapAdd[j - startX];
 	}
-	setColliders(startX/3 * 32, startY * 32, sizeI / 3 * 32, 32, sign);
+	setColliders((float)(startX / 3 * TileLength), (float)(startY * TileLength), (float)(sizeI * TileLength), (float)TileLength, sign);
 }
 
 
 
-void TileMaps::setColliders(int strtX, int strtY, int length, int height, char sign)
+void TileMaps::setColliders(float strtX, float strtY, float length, float height, char sign)
 { // adds the collider vec4 to the appropriate type vector depending on the given sign
 	switch (sign)
 	{
@@ -119,8 +119,8 @@ void TileMaps::DrawTile(int tx, int ty, Tmpl8::Surface* screen, int x, int y)
 { // function to drawing a tile taken from the c++ beginner lessons https://www.3dgep.com/cpp-fast-track-12-classes/#more-9350
 	Tmpl8::Pixel* src = Tiles->GetBuffer() + 1 + tx * 33 + (1 + ty * 33) * 595;
 	Tmpl8::Pixel* dst = screen->GetBuffer() + x + y * ScreenWidth;
-	for (int i = 0; i < 32; i++, src += 595, dst += ScreenWidth)
-		for (int j = 0; j < 32; j++) {
+	for (int i = 0; i < TileLength; i++, src += 595, dst += ScreenWidth)
+		for (int j = 0; j < TileLength; j++) {
 			dst[j] = src[j];
 		}
 }
@@ -128,9 +128,9 @@ void TileMaps::DrawTile(int tx, int ty, Tmpl8::Surface* screen, int x, int y)
 void TileMaps::DrawTile(int tx, int ty, Tmpl8::Surface* screen, int x, int y, float precY, int startY, float precX, int startX)
 { // a modefied function of DrawTile that can control the starting and end point of tile on print
 	Tmpl8::Pixel* src = Tiles->GetBuffer() + 1 + tx * 33 + (1 + ty * 33) * 595;
-	Tmpl8::Pixel* dst = screen->GetBuffer() + x + y * 800;
-	for (int i = 0; i < 32 * precY; i++, src += 595, dst += 800)
-		for (int j = 0; j < 32 * precX; j++)
+	Tmpl8::Pixel* dst = screen->GetBuffer() + x + y * ScreenWidth;
+	for (int i = 0; i < TileLength * precY; i++, src += 595, dst += ScreenWidth)
+		for (int j = 0; j < TileLength * precX; j++)
 			dst[j] = src[(j + startX) + startY * 595];
 }
 void TileMaps::mapScroll(Tmpl8::Surface* screen)
@@ -145,22 +145,22 @@ void TileMaps::mapScroll(Tmpl8::Surface* screen)
 	* and print an extra tile with, so the first and last tiles make together the a whole tile
 	*/
 
-	for (int i = 0; i < ScreenHeight/32 + int(fmodf(2 - fmodf(YoffSet, 1), 2)); i++)
+	for (int i = 0; i < ScreenHeight/ TileLength + int(fmodf(2 - fmodf(YoffSet, 1), 2)); i++)
 	{ // run through the amount of tiles that fit on the screen's height, if the first one is cut short then it will run an extra tile
-		for (int j = 0; j < ScreenWidth/32 + int(fmodf(2 - fmodf(XoffSet, 1), 2)); j++)
+		for (int j = 0; j < ScreenWidth/ TileLength + int(fmodf(2 - fmodf(XoffSet, 1), 2)); j++)
 		{// run through the amount of tiles that fit on the screen's width, if the first one is cut short then it will run an extra tile
 			int tx = Map[int(i + YoffSet)][int(j + XoffSet) * 3] - 'a';
 			int ty = Map[int(i + YoffSet)][int(j + XoffSet) * 3 + 1] - 'a';
 			float precX = 1, precY = 1;
 			int startX = 0, startY = 0;
-			int posX = (j * 32) - int(fmodf(XoffSet, 1) * 32), posY = (i * 32) - int(fmodf(YoffSet, 1) * 32);
+			int posX = (j * TileLength) - int(fmodf(XoffSet, 1) * TileLength), posY = (i * TileLength) - int(fmodf(YoffSet, 1) * TileLength);
 			if (j == 0)
-				startX = int(fmodf(XoffSet, 1) * 32),posX = 0,precX = 1.0f - fmodf(XoffSet,1);
-			if (j == (ScreenWidth / 32 + int(fmodf(2 - fmodf(XoffSet, 1), 2))) - 1)
+				startX = int(fmodf(XoffSet, 1) * TileLength),posX = 0,precX = 1.0f - fmodf(XoffSet,1);
+			if (j == (ScreenWidth / TileLength + int(fmodf(2 - fmodf(XoffSet, 1), 2))) - 1)
 				precX = (fmodf(XoffSet,1) == 0.0f) ? 1.0f : fmodf(XoffSet, 1);
 			if (i == 0)
-				startY = int(fmodf(YoffSet, 1) * 32), posY = 0, precY = 1.0f - fmodf(YoffSet, 1);
-			if (i == (ScreenHeight / 32 + int(fmodf(2 - fmodf(YoffSet, 1), 2))) - 1)
+				startY = int(fmodf(YoffSet, 1) * TileLength), posY = 0, precY = 1.0f - fmodf(YoffSet, 1);
+			if (i == (ScreenHeight / TileLength + int(fmodf(2 - fmodf(YoffSet, 1), 2))) - 1)
 				precY = (fmodf(YoffSet, 1) == 0.0f) ? 1.0f : fmodf(YoffSet, 1);
 
 			DrawTile(tx, ty, screen, posX, posY,precY,startY,precX,startX); // drawing the tile
