@@ -12,7 +12,7 @@ strat_X / start_Y / length / height / sign
 22 / 21 / 1 / 1 / x // mid block 1 tile block					{   | mid}
 19 / 22 / 3 / 1 / x // mid block first right level				{   | mid}
 12 / 26 / 4 / 3 / x // mid block middle bottom big block			{   | mid}
-11 / 25 / 4 / 1 / x // mid block big block adjacent level			{   | mid}
+11 / 25 / 5 / 1 / x // mid block big block adjacent level			{   | mid}
 4 / 22 / 4 / 3 / x // mid block left middle big block				{   | mid}
 4 / 21 / 5 / 1 / x // mid block 1 tile block slow (left big block)	{   | mid}
 13 / 18 / 2 / 4 / x // mid block middle upper big block			{   | mid}
