@@ -20,7 +20,7 @@ namespace Tmpl8
 	const std::vector<char*> object_files = { "world/objects1.1.txt","world/objects1.2.txt" }; // the two object txt files 
 
 	TileMaps tilemap("assets/nc2tiles.png", (int)mapHeight * 3, (int)mapWidth * 3 * (int)map_files.size()); // the tilemap class object
-	Gun gun1(vec2(400, 256), 16);
+	Gun gun1(vec2(400, 50), 16);
 	Ball player(player_start_X, player_start_Y, 18); // ball class object
 
 	// the flow between states of the state machine
@@ -229,7 +229,7 @@ namespace Tmpl8
 			display_time[6] = '\0';
 			
 			tilemap.mapScroll(screen); // map printing function
-			gun1.render(screen, tilemap);
+			gun1.render(screen, tilemap, player);
 			player.printBall(screen); // ball printing function
 			player.Drive(tilemap); // ball control function
 			player.verlet(tilemap); // ball movement resolution function
