@@ -6,8 +6,7 @@
 #include<fstream>
 #include<string>
 #include<istream>
-
-
+#include"gun.h"
 
 namespace Tmpl8
 {
@@ -21,7 +20,7 @@ namespace Tmpl8
 	const std::vector<char*> object_files = { "world/objects1.1.txt","world/objects1.2.txt" }; // the two object txt files 
 
 	TileMaps tilemap("assets/nc2tiles.png", (int)mapHeight * 3, (int)mapWidth * 3 * (int)map_files.size()); // the tilemap class object
-
+	Gun gun1(vec2(400, 256), 16);
 	Ball player(player_start_X, player_start_Y, 18); // ball class object
 
 	// the flow between states of the state machine
@@ -201,7 +200,7 @@ namespace Tmpl8
 		uint32_t currTime;
 		switch (state_machine)
 		{
-		case menu:
+		case menu:			
 			screen->Centre("PRESS ENTER TO START!", 210, Tmpl8::GreenMask , 4);
 			if (GetAsyncKeyState(VK_RETURN)) // when enter is pressed then switch to play state
 			{
@@ -230,11 +229,13 @@ namespace Tmpl8
 			display_time[6] = '\0';
 			
 			tilemap.mapScroll(screen); // map printing function
+			gun1.render(screen, tilemap);
 			player.printBall(screen); // ball printing function
 			player.Drive(tilemap); // ball control function
 			player.verlet(tilemap); // ball movement resolution function
 			player.mapReact(screen, tilemap); // map interaction function
 			screen->Print(display_time, 5,5, Tmpl8::RedMask,2);
+			
 			if (player.isdead() || player.victory()) switchState(); // if death or win conditions are met switch to stop state
 			break;
 		case stop:

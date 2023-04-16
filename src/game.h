@@ -2,6 +2,7 @@
 #include"tilemap.h"
 #include"player.h"
 #include"SDL.h"
+
 namespace Tmpl8 {
 
 enum states

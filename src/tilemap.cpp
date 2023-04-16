@@ -131,7 +131,8 @@ void TileMaps::DrawTile(int tx, int ty, Tmpl8::Surface* screen, int x, int y, fl
 	Tmpl8::Pixel* dst = screen->GetBuffer() + x + y * ScreenWidth;
 	for (int i = 0; i < TileLength * precY; i++, src += 595, dst += ScreenWidth)
 		for (int j = 0; j < TileLength * precX; j++)
-			dst[j] = src[(j + startX) + startY * 595];
+			if(x + j < ScreenWidth)
+				dst[j] = src[(j + startX) + startY * 595];
 }
 void TileMaps::mapScroll(Tmpl8::Surface* screen)
 { // function that prints the map on the screen depending on the offset of the map
