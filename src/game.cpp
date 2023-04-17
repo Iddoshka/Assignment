@@ -20,7 +20,8 @@ namespace Tmpl8
 	const std::vector<char*> object_files = { "world/objects1.1.txt","world/objects1.2.txt" }; // the two object txt files 
 
 	TileMaps tilemap("assets/nc2tiles.png", (int)mapHeight * 3, (int)mapWidth * 3 * (int)map_files.size()); // the tilemap class object
-	Gun gun1(vec2(400, 50), 16);
+	Gun gun1(vec2(400, 50), 16, 2);
+	Gun gun2(vec2(771, 50), 24 , 1);
 	Ball player(player_start_X, player_start_Y, 18); // ball class object
 
 	// the flow between states of the state machine
@@ -84,6 +85,8 @@ namespace Tmpl8
 	// reseting the player to the start position upon death or reset button pressed
 	void Game::reset(Ball &player)
 	{ 
+		gun1.reset();
+		gun2.reset();
 		player.setPX(player_start_X);
 		player.setPY(player_start_Y);
 		player.setX(player_start_X);
@@ -134,6 +137,7 @@ namespace Tmpl8
 
 	void Game::Init()
 	{
+		
 		/*
 		* if the best time isn't changed to the players' best time then it won't print
 		* if it is initialized then it will print the best time and ask if you can do better
@@ -224,12 +228,13 @@ namespace Tmpl8
 			currTime = (uint32_t)SDL_GetPerformanceCounter(); // displaying the current elapsed time
 			game_time = std::to_string(ceil(static_cast<double>(
 				(currTime - startTime) / static_cast<double>(SDL_GetPerformanceFrequency())) * 100.0) / 100.0);
-			display_time = new char[7];
-			std::strncpy(display_time, game_time.c_str(),6);
-			display_time[6] = '\0';
+			display_time = new char[8];
+			std::strncpy(display_time, game_time.c_str(),7);
+			display_time[7] = '\0';
 			
 			tilemap.mapScroll(screen); // map printing function
-			gun1.render(screen, tilemap, player);
+			gun1.render(screen, tilemap, player,startTime);
+			gun2.render(screen, tilemap, player,startTime);
 			player.printBall(screen); // ball printing function
 			player.Drive(tilemap); // ball control function
 			player.verlet(tilemap); // ball movement resolution function
