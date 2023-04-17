@@ -22,7 +22,7 @@ namespace Tmpl8
 	}
 
 	static bool elapesd_time(uint32_t str_time, unsigned int lapse)
-	{
+	{ // need to make it work with a double elapsed time!!
 		if (lapse == 0) return true;
 		uint32_t currTime = SDL_GetPerformanceCounter();
 		int elapsedTime = static_cast<int>(
@@ -49,17 +49,50 @@ namespace Tmpl8
 
 		switch (frame)
 		{
-		case 0:
+		case 0: // frame towards north
 			hit_box.push_back(vec4(16.9f, 4.0f, b_Width - (16.9f * 2.0f), b_Height - (4.0f * 2.0f)));
 			break;
 		case 1:
-			hit_box.push_back(vec4(22.0f, 4.0f, 8.0f, 8.0f));
-			hit_box.push_back(vec4(19.0f, 12.0f, 6.0f, 10.0f));
-			hit_box.push_back(vec4(15.0f, 22.0f, 4.0f, 8.0f));
+			hit_box.push_back(vec4(20.0f, 2.0f, 8.0f, 8.0f));
+			hit_box.push_back(vec4(17.0f, 10.0f, 7.0f, 12.0f));
+			hit_box.push_back(vec4(14.0f, 22.0f, 4.0f, 8.0f));
 			hit_box.push_back(vec4(12.0f, 30.0f, 4.0f, 6.0f));
 			break;
-		case 8:
-			hit_box.push_back(vec4(16.9f, 4.0f, b_Width - (16.9f * 2.0f), b_Height - (4.0f * 2.0f)));
+		case 2: // frame towards north east
+			hit_box.push_back(vec4(24.0f, 6.0f, 6.0f, 9.0f));
+			hit_box.push_back(vec4(19.0f, 12.0f, 5.0f, 6.0f));
+			hit_box.push_back(vec4(15.0f, 18.0f, 4.0f, 6.0f));
+			hit_box.push_back(vec4(10.0f, 24.0f, 5.0f, 6.0f));
+			break;
+		case 3:
+			hit_box.push_back(vec4(26.0f, 13.0f, 9.0f, 6.0f));
+			hit_box.push_back(vec4(20.0f, 17.0f, 6.0f, 5.0f));
+			hit_box.push_back(vec4(18.0f, 22.0f, 6.0f, 2.0f));
+			hit_box.push_back(vec4(7.0f, 24.0f, 7.0f, 2.0f));
+			break;
+		case 4: // frame towards east
+			hit_box.push_back(vec4(5.0f, 17.6f, 31.0f, 5.9f));
+			break;
+		case 5:
+			hit_box.push_back(vec4(6.0f, 15.0f, 4.0f, 2.0f));
+			hit_box.push_back(vec4(10.0f, 17.0f, 8.0f, 2.0f));
+			hit_box.push_back(vec4(19.0f, 19.0f, 7.0f, 5.0f));
+			hit_box.push_back(vec4(26.0f, 21.0f, 8.0f, 7.0f));
+			break;
+		case 6: // frame towards south east
+			hit_box.push_back(vec4(9.0f, 9.0f, 4.0f, 5.0f));
+			hit_box.push_back(vec4(13.0f, 14.0f, 6.0f, 6.0f));
+			hit_box.push_back(vec4(19.0f, 20.0f, 6.0f, 5.0f));
+			hit_box.push_back(vec4(25.0f, 25.0f, 7.0f, 6.0f));
+			break;
+		case 7: 
+			hit_box.push_back(vec4(21.0f, 26.0f, 7.0f, 11.0f));
+			hit_box.push_back(vec4(18.0f, 18.0f, 6.0f, 8.0f));
+			hit_box.push_back(vec4(15.0f, 10.0f, 3.0f, 8.0f));
+			hit_box.push_back(vec4(13.0f, 6.0f, 3.0f, 4.0f));
+			break;
+		case 8: // frame towards south
+			hit_box.push_back(vec4(16.9f, 4.0f, 6.2f, 32.0f));
 			break;
 		case 9:
 			hit_box.push_back(vec4(22.0f, 4.0f, 6.0f, 6.0f));
@@ -137,7 +170,7 @@ namespace Tmpl8
 		{
 			if (elapesd_time(str_time, lapse))
 			{
-				casing = new Bullet(vec2(coordinates.x + a_Width / 2.0f - 4.0f, coordinates.y + a_Height), frame);
+				casing = new Bullet(vec2(coordinates.x + a_Width/2.0f - b_Width/2.0f, coordinates.y), frame);
 				fired = true;
 			}
 		}
@@ -147,6 +180,7 @@ namespace Tmpl8
 	{
 		if (fired)
 		{
+			//(*casing).GetSurface()->~Surface();
 			(*casing).~Bullet();
 			fired = false;
 		}
@@ -155,8 +189,8 @@ namespace Tmpl8
 	Bullet::Bullet(vec2 In_coordinates, unsigned int num_frame) :
 		Sprite(new Surface("assets/phaser.tga"), 16)
 	{
-		coordinates = { In_coordinates.x - b_Width / 2.0f + 4.0f , In_coordinates.y - b_Height / 2.0f };
 		angle = frame_to_angle(num_frame);
+		coordinates += { In_coordinates.x + b_Height * sin((angle * PI) / 180.0f), In_coordinates.y - b_Height * cosf((angle * PI) / 180.0f) };
 		frame = angle_to_frame(angle);
 		SetFrame(frame);
 		hit_boxes = hitBox(frame, coordinates);

@@ -70,5 +70,8 @@
     <ClInclude Include="src\gun.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\bullet.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

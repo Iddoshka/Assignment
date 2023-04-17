@@ -20,7 +20,7 @@ namespace Tmpl8
 	const std::vector<char*> object_files = { "world/objects1.1.txt","world/objects1.2.txt" }; // the two object txt files 
 
 	TileMaps tilemap("assets/nc2tiles.png", (int)mapHeight * 3, (int)mapWidth * 3 * (int)map_files.size()); // the tilemap class object
-	Gun gun1(vec2(81, 250), 2, 2);
+	Gun gun1(vec2(81, 250), 4, 2);
 	Ball player(player_start_X, player_start_Y, 18); // ball class object
 
 	// the flow between states of the state machine
@@ -97,7 +97,7 @@ namespace Tmpl8
 	// function will set all the objects into the tilemap class object
 	void setMapObjects(std::vector<obstacles> map_objects)
 	{
-		for (auto a : map_objects)
+		for (const auto& a : map_objects)
 		{
 			tilemap.setColliders(a.obj.x, a.obj.y, a.obj.z, a.obj.w, a.sign);
 		}

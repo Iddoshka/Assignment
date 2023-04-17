@@ -15,7 +15,7 @@ bool gravity_switch = true;
 
 // initialzing the player with its sprite and the given coordinates and radius
 Ball::Ball(float xIn, float yIn, int rIn) 
-	:	ball_sprite(new Tmpl8::Surface("assets/ball.png"),1)
+	:	ball_sprite(new Tmpl8::Surface("assets/ball.png"),4)
 {
 	coordinates.x = xIn, coordinates.y = yIn;
 	r = rIn;
@@ -26,7 +26,8 @@ Ball::Ball(float xIn, float yIn, int rIn)
 // printing the ball on the screen
 void Ball::printBall(Tmpl8::Surface* screen) 
 {
-	ball_sprite.DrawScaled((int)coordinates.x - r, (int)coordinates.y - r, r * 2, r * 2, screen,true);
+	ball_sprite.SetFrame(roundf((float)((int)this->ball_sprite.GetSurface()->GetAngle() % 360) / 90.0f));
+	ball_sprite.DrawScaled((int)coordinates.x - r, (int)coordinates.y - r, r * 2, r * 2, screen);
 	for (int i = 0; i < 64; i++)
 	{
 		float r1 = (float)i * Tmpl8::PI / TileLength, r2 = (float)(i + 1) * Tmpl8::PI / TileLength;
@@ -365,7 +366,12 @@ void Ball::verlet(TileMaps &map)
 	}
 
 	if (velocity.x != 0) // depending on the velocity of the ball on the X axis I reload the ball image in and angle
-		ball_sprite.GetSurface()->SetAngle(ball_sprite.GetSurface()->GetAngle() - 20 * (velocity.x / MAX_SPEED_X));
+
+	{
+		double safe_angle = ball_sprite.GetSurface()->GetAngle() + 20 * (velocity.x / MAX_SPEED_X);
+		safe_angle = (safe_angle < 0) ? safe_angle + 360.0 : safe_angle;
+		ball_sprite.GetSurface()->SetAngle(safe_angle);
+	}
 
 }
 
