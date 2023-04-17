@@ -4,26 +4,26 @@ namespace Tmpl8
 {
 	const int a_Width = 58;
 	const int a_Height = 52;
-	const int b_Width = 32;
+	const int b_Width = 40;
 	const int b_Height = 40;
 
 	const unsigned int bullet_speed = 10;
 
-	static unsigned int angle_to_frame(unsigned int angle) 
+	static unsigned int angle_to_frame(unsigned int angle)
 	{
-		unsigned int frame = (angle % 360) / 18 ;
+		unsigned int frame = roundf((angle % 360) / 22.5f);
 		return frame;
 	}
 
 	static unsigned int frame_to_angle(unsigned int num_frame)
 	{
-		unsigned int angle = (num_frame * (360.0f / 32.0f));
+		unsigned int angle = (int)(num_frame * (292.5f / 26.0f));
 		return angle;
 	}
 
 	static bool elapesd_time(uint32_t str_time, unsigned int lapse)
 	{
-		if(lapse == 0) return true;
+		if (lapse == 0) return true;
 		uint32_t currTime = SDL_GetPerformanceCounter();
 		int elapsedTime = static_cast<int>(
 			(currTime - str_time) / static_cast<int>(SDL_GetPerformanceFrequency())
@@ -43,7 +43,46 @@ namespace Tmpl8
 			return false;
 	}
 
-	Gun::Gun(vec2 In_coordinates, unsigned int num_frame ,unsigned int lapse_in) :
+	static std::vector<vec4> hitBox(unsigned int frame , vec2 coordinates)
+	{
+		std::vector<vec4> hit_box;
+
+		switch (frame)
+		{
+		case 0:
+			hit_box.push_back(vec4(16.9f, 4.0f, b_Width - (16.9f * 2.0f), b_Height - (4.0f * 2.0f)));
+			break;
+		case 1:
+			hit_box.push_back(vec4(10.0f, 28.0f, 6.0f, 6.0f));
+			hit_box.push_back(vec4(12.0f, 22.0f, 4.0f, 6.0f));
+			hit_box.push_back(vec4(15.0f, 16.0f, 8.0f, 6.0f));
+			hit_box.push_back(vec4(19.0f, 10.0f, 10.0f, 6.0f));
+			hit_box.push_back(vec4(22.0f, 4.0f, 8.0f, 8.0f));
+			break;
+		case 8:
+			hit_box.push_back(vec4(16.9f, 4.0f, b_Width - (16.9f * 2.0f), b_Height - (4.0f * 2.0f)));
+			break;
+		case 9:
+			hit_box.push_back(vec4(22.0f, 4.0f, 6.0f, 6.0f));
+			hit_box.push_back(vec4(19.0f, 10.0f, 4.0f, 6.0f));
+			hit_box.push_back(vec4(15.0f, 16.0f, 8.0f, 6.0f));
+			hit_box.push_back(vec4(12.0f, 22.0f, 10.0f, 6.0f));
+			hit_box.push_back(vec4(10.0f, 28.0f, 8.0f, 8.0f));
+			break;
+		default:
+			break;
+		}
+
+		for (vec4& a : hit_box)
+		{
+			a.x += coordinates.x;
+			a.y += coordinates.y;
+		}
+
+		return hit_box;
+	}
+
+	Gun::Gun(vec2 In_coordinates, unsigned int num_frame, unsigned int lapse_in) :
 		Sprite(new Surface("assets/minigun.tga"), 32)
 	{
 		lapse = lapse_in;
@@ -66,7 +105,7 @@ namespace Tmpl8
 		}
 	}
 
-	void Gun::render(Surface* screen, TileMaps map , Ball& player, uint32_t str_time)
+	void Gun::render(Surface* screen, TileMaps map, Ball& player, uint32_t str_time)
 	{
 		shoot(player, screen, map, str_time);
 		if (!on_screen(map, coordinates, a_Width, a_Height))
@@ -85,12 +124,12 @@ namespace Tmpl8
 		if (fired)
 		{
 			fired = (*casing).fly(player, screen, map);
-			if(!fired)
+			if (!fired)
 				(*casing).~Bullet();
 		}
 		else
 		{
-			if (elapesd_time(str_time , lapse))
+			if (elapesd_time(str_time, lapse))
 			{
 				casing = new Bullet(vec2(coordinates.x + a_Width / 2.0f - 4.0f, coordinates.y + a_Height), frame);
 				fired = true;
@@ -108,32 +147,38 @@ namespace Tmpl8
 	}
 
 	Bullet::Bullet(vec2 In_coordinates, unsigned int num_frame) :
-		Sprite(new Surface("assets/phaser.tga"), 20)
+		Sprite(new Surface("assets/phaser.tga"), 16)
 	{
-		coordinates = { In_coordinates.x - b_Width/2.0f , In_coordinates.y - b_Height/2.0f };
+		coordinates = { In_coordinates.x - b_Width / 2.0f + 4.0f , In_coordinates.y - b_Height / 2.0f };
 		angle = frame_to_angle(num_frame);
 		frame = angle_to_frame(angle);
 		SetFrame(frame);
-		
+		hit_boxes = hitBox(frame, coordinates);
 	}
 
-	bool Bullet::fly(Ball& player , Surface* screen, TileMaps map)
+	bool Bullet::fly(Ball& player, Surface* screen, TileMaps map)
 	{
-		vec2 vel = { sin((angle * PI) /180.0f ) * bullet_speed , cosf((angle * PI) / 180.0f) * bullet_speed };
+		vec2 vel = { sin((angle * PI) / 180.0f) * bullet_speed , cosf((angle * PI) / 180.0f) * bullet_speed };
 		vel.x = (abs(vel.x) < 0.01) ? 0 : vel.x;
 		vel.y = (abs(vel.y) < 0.01) ? 0 : -vel.y;
 		coordinates += vel;
-		if (player.checkCollision(vec4(coordinates.x + 10.0f , coordinates.y , b_Width - 10.0f, b_Height), player.getCrd() + vec2(map.getXoffSet() * 32.0f, map.getYoffSet() * 32.0f)).length() < player.getR())
+		for (vec4 &a : hit_boxes)
 		{
-			player.died();
-			return false;
+			a.x += vel.x;
+			a.y += vel.y;
+			
+			if (player.checkCollision(a, player.getCrd() + vec2(map.getXoffSet() * 32.0f, map.getYoffSet() * 32.0f)).length() < player.getR())
+			{
+				player.died();
+				return false;
+			}
 		}
-		else if (coordinates.y + b_Height > ScreenHeight || coordinates.y < 0 || coordinates.x < 0 || coordinates.x + b_Width > ScreenWidth)
-		{
-			coordinates = str_cord;
+		if (hit_boxes.front().y + hit_boxes.front().w > ScreenHeight || coordinates.y + hit_boxes.back().y < 0 || coordinates.x + hit_boxes.back().x < 0 || hit_boxes.front().x + hit_boxes.front().z > (map.getWidth() / 3.0f) * 32.0f)
 			return false;
-		}
+
 		DrawScaled(screen, map);
+		for (vec4& a : hit_boxes)
+			screen->Box(a.x, a.y, a.x + a.z, a.y + a.w, GreenMask);
 		return true;
 	}
 
@@ -151,3 +196,4 @@ namespace Tmpl8
 		}
 	}
 }
+

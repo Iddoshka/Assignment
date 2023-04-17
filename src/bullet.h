@@ -18,6 +18,8 @@ namespace Tmpl8
 		unsigned int angle = 0;
 		unsigned int frame = 0;
 
+		std::vector<vec4> hit_boxes;
+
 		void DrawScaled(Surface* screen, TileMaps map);
 	};
 }
