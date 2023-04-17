@@ -34,6 +34,11 @@ namespace Tmpl8
 			startTime = (uint32_t)SDL_GetPerformanceCounter();
 			break;
 		case play:
+			if (player.victory())
+			{
+				state_machine = menu;
+				break;
+			}
 			state_machine = stop;
 			break;
 		case stop:
@@ -85,6 +90,7 @@ namespace Tmpl8
 	// reseting the player to the start position upon death or reset button pressed
 	void Game::reset(Ball &player)
 	{ 
+		startTime = SDL_GetPerformanceCounter();
 		player.setPX(player_start_X);
 		player.setPY(player_start_Y);
 		player.setX(player_start_X);
@@ -217,7 +223,8 @@ namespace Tmpl8
 			else if (player.victory())
 			{ // on win condition after 4 seconds of a printed messege shutdown
 				Sleep(4000);
-				Shutdown();
+				screen->Clear(0);
+				switchState();
 			}
 			if (GetAsyncKeyState(0X52)) reset(player); // if 'R' key is pressed then reset ball
 			// clear the graphics window
