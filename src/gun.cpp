@@ -43,7 +43,7 @@ namespace Tmpl8
 			return false;
 	}
 
-	static std::vector<vec4> hitBox(unsigned int frame , vec2 coordinates)
+	static std::vector<vec4> hitBox(unsigned int frame, vec2 coordinates)
 	{
 		std::vector<vec4> hit_box;
 
@@ -53,11 +53,10 @@ namespace Tmpl8
 			hit_box.push_back(vec4(16.9f, 4.0f, b_Width - (16.9f * 2.0f), b_Height - (4.0f * 2.0f)));
 			break;
 		case 1:
-			hit_box.push_back(vec4(10.0f, 28.0f, 6.0f, 6.0f));
-			hit_box.push_back(vec4(12.0f, 22.0f, 4.0f, 6.0f));
-			hit_box.push_back(vec4(15.0f, 16.0f, 8.0f, 6.0f));
-			hit_box.push_back(vec4(19.0f, 10.0f, 10.0f, 6.0f));
 			hit_box.push_back(vec4(22.0f, 4.0f, 8.0f, 8.0f));
+			hit_box.push_back(vec4(19.0f, 12.0f, 6.0f, 10.0f));
+			hit_box.push_back(vec4(15.0f, 22.0f, 4.0f, 8.0f));
+			hit_box.push_back(vec4(12.0f, 30.0f, 4.0f, 6.0f));
 			break;
 		case 8:
 			hit_box.push_back(vec4(16.9f, 4.0f, b_Width - (16.9f * 2.0f), b_Height - (4.0f * 2.0f)));
@@ -68,6 +67,13 @@ namespace Tmpl8
 			hit_box.push_back(vec4(15.0f, 16.0f, 8.0f, 6.0f));
 			hit_box.push_back(vec4(12.0f, 22.0f, 10.0f, 6.0f));
 			hit_box.push_back(vec4(10.0f, 28.0f, 8.0f, 8.0f));
+			break;
+		case 15:
+			hit_box.push_back(vec4(18.0f, 4.0f, 8.0f, 8.0f));
+			hit_box.push_back(vec4(21.0f, 12.0f, 10.0f, 6.0f));
+			hit_box.push_back(vec4(25.0f, 18.0f, 8.0f, 6.0f));
+			hit_box.push_back(vec4(28.0f, 24.0f, 4.0f, 6.0f));
+			hit_box.push_back(vec4(30.0f, 30.0f, 6.0f, 6.0f));
 			break;
 		default:
 			break;
@@ -162,18 +168,18 @@ namespace Tmpl8
 		vel.x = (abs(vel.x) < 0.01) ? 0 : vel.x;
 		vel.y = (abs(vel.y) < 0.01) ? 0 : -vel.y;
 		coordinates += vel;
-		for (vec4 &a : hit_boxes)
+		for (vec4& a : hit_boxes)
 		{
 			a.x += vel.x;
 			a.y += vel.y;
-			
+
 			if (player.checkCollision(a, player.getCrd() + vec2(map.getXoffSet() * 32.0f, map.getYoffSet() * 32.0f)).length() < player.getR())
 			{
 				player.died();
 				return false;
 			}
 		}
-		if (hit_boxes.front().y + hit_boxes.front().w > ScreenHeight || coordinates.y + hit_boxes.back().y < 0 || coordinates.x + hit_boxes.back().x < 0 || hit_boxes.front().x + hit_boxes.front().z > (map.getWidth() / 3.0f) * 32.0f)
+		if (hit_boxes.front().y + hit_boxes.front().w > ScreenHeight || coordinates.y + hit_boxes.back().y < 0 || coordinates.x + hit_boxes.back().x < 0 || hit_boxes.front().x + hit_boxes.front().z >(map.getWidth() / 3.0f) * 32.0f)
 			return false;
 
 		DrawScaled(screen, map);
