@@ -24,6 +24,7 @@ public:
 	void verlet(TileMaps &map); //the verlet integration for the ball
 	void died() { dead = true; }
 	void revive() { dead = false; }
+	void lose() { won = false;}
 	bool isdead() { return dead; }
 	bool victory() { return won; }
 	

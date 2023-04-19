@@ -73,19 +73,25 @@ Tmpl8::vec2 Ball::checkCollision(Tmpl8::vec4 coll_obj, Tmpl8::vec2 coor)
 Tmpl8::vec2 Ball::linearFunc(Tmpl8::vec2 diff)
 {	
 	Tmpl8::vec2 fix = { fmodf((float)r - abs(diff.x),(float)r), fmodf((float)r - abs(diff.y),(float)r) }; // the distance on each axis to move the ball so it will not collide with the object
-	if (coordinates.x == pcord.x)
+	if (fix.y > r) {
+		printf("stop");
+	}
+	if (diff.x == 0)
 	{ // if the ball collision is only verticly
 		Tmpl8::vec2 newCord = { coordinates.x, coordinates.y + fix.y * dir.y };
 		return newCord; 
 	}
-	if (coordinates.y == pcord.y)
+	if (diff.y == 0)
 	{ // if the ball collision is only horizontaly
-		Tmpl8::vec2 newCord = { coordinates.x + fix.y * dir.x, coordinates.y };
+		Tmpl8::vec2 newCord = { coordinates.x + fix.x * dir.x, coordinates.y };
 		return newCord;
 	}
 	float m = (coordinates.y - pcord.y) / (coordinates.x - pcord.x); // calculating the incline of the linear function
 	float b = pcord.y - m * pcord.x;
 	Tmpl8::vec2 newCord = { ((coordinates.y + (fix.y * dir.y) - b) / m) + (fix.x * dir.x), ((coordinates.x + (fix.x * dir.x)) * m + b) + (fix.y * dir.y)};
+	if (abs(coordinates.y - newCord.y) > 80) {
+		printf("stop");
+	}
 	return newCord; // using linear function between the pcord and the coordinates I find the point on the function when add the fix vector to the coordinates
 }
 // function to find the exact first contact point between the ball and an AABB object on a two axis collision
@@ -108,7 +114,7 @@ Tmpl8::vec2 Ball::findContact(Tmpl8::vec2 diff)
 	if ((r * r) * sqr_len - (det * det) < 0 || d.x == 0 || d.y ==0)
 	{ // the velocity of the ball in one or both axis is zero
 		Tmpl8::vec2 fix = { 0, ((r + 1) - abs(diff.y)) * dir.y };
-		pcord = velocity;
+		pcord = (abs(velocity.y) <= ver_res) ? Tmpl8::vec2(velocity.x,0) : velocity;
 		return coordinates + fix;
 	}
 	float aux = sqrtf((r * r) *  sqr_len - (det * det));
@@ -124,6 +130,7 @@ Tmpl8::vec2 Ball::findContact(Tmpl8::vec2 diff)
 	Tmpl8::vec2 norm = new_cord;
 	aux = (2 * norm.dot(velocity)) / (float)pow(norm.length(),2);
 	Tmpl8::vec2 new_vel = (norm * aux) - velocity;
+	new_vel.y = (abs(new_vel.y) <= ver_res) ? 0 : new_vel.y;
 	new_cord += obj_cord;
 	pcord = { abs(new_vel.x) * dir.x, abs(new_vel.y) * dir.y };
 	
@@ -194,6 +201,7 @@ void Ball::positioningX(TileMaps &map)
 	*/
 	// checking if the ball is heading towards the left edge of the map or the right edge of the map
 	bool edgeX = ((map.getXoffSet() == (map.getWidth() / 3.0f - ScreenWidth	/ TileLength) && velocity.x > 0) || (map.getXoffSet() == 0.0f && velocity.x < 0));
+
 	if (coordinates.x != ScreenWidth / 2 && !edgeX)
 	{
 		if (((coordinates.x > ScreenWidth / 2) && (pcord.x <= ScreenWidth / 2)) || ((coordinates.x < ScreenWidth / 2) && (pcord.x >= ScreenWidth / 2)))
@@ -265,15 +273,39 @@ void Ball::positioningY(TileMaps& map, bool edgeY)
 
 //function takes the corrected coordinate and depending on position and new position changes coordinate or offset
 void Ball::fixCollision(TileMaps& map, Tmpl8::vec2 newCord)
-{
+{ // need to fix collision when the fix is over the scroll line
 	bool edgeX = ((map.getXoffSet() == (map.getWidth() / 3.0f - ScreenWidth / TileLength) && velocity.x > 0) || (map.getXoffSet() == 0.0f && velocity.x < 0));
 	bool edgeY = ((map.getYoffSet() == (map.getHeight() - ScreenHeight / TileLength) && velocity.y > 0) || (map.getYoffSet() == 0.0f && velocity.y < 0));
 	Tmpl8::vec2 dist(coordinates - newCord);
-	
+	if(!edgeX && coordinates.x != ScreenWidth / 2)
+	{
+		if (coordinates.x < ScreenWidth / 2 && newCord.x > ScreenWidth / 2 ||
+			coordinates.x > ScreenWidth / 2 && newCord.x < ScreenWidth / 2)
+		{
+			dist.x -= ScreenWidth / 2 - coordinates.x;
+			coordinates.x = ScreenWidth / 2.0f;
+			map.setXoffSet(map.getXoffSet() + (dist.x * dir.x) / TileLength);
+		}
+	}
 	if (edgeX || coordinates.x != ScreenWidth / 2)
 		coordinates.x = newCord.x;
 	else
 		map.setXoffSet(map.getXoffSet() + (abs(dist.x) * dir.x) / TileLength);
+	if (!edgeY && (coordinates.y != ScreenHeight - TileLength || coordinates.y != TileLength))
+	{
+		if (coordinates.y < ScreenHeight - TileLength && newCord.y > ScreenHeight - TileLength)
+		{
+			dist.y -= ScreenHeight - TileLength - coordinates.y;
+			coordinates.y = ScreenHeight - TileLength;
+			map.setYoffSet(map.getYoffSet() + (dist.y * dir.y) / TileLength);
+		}
+		else if (coordinates.y > TileLength && newCord.y < TileLength)
+		{
+			dist.y -= TileLength - coordinates.y;
+			coordinates.y = TileLength;
+			map.setYoffSet(map.getYoffSet() + (dist.y * dir.y) / TileLength);
+		}
+	}
 	if (edgeY || (coordinates.y != (TileLength + r) && coordinates.y != ScreenHeight - (TileLength + r)))
 		coordinates.y = newCord.y;
 	else
@@ -387,15 +419,14 @@ void Ball::mapReact(Tmpl8::Surface* screen, TileMaps& map)
 
 	float holding_vel = velocity.length();
 	Tmpl8::vec2 new_coor = coordinates;
-	std::vector<Tmpl8::vec4> objects[5] = { map.getWin(), map.getDeaths(), map.getColliders(), map.getSlowers(), map.getJumpers()};
+	const std::vector<Tmpl8::vec4> objects[5] = { map.getWin(), map.getDeaths(), map.getColliders(), map.getSlowers(), map.getJumpers()};
 	Tmpl8::vec2 newCord;
 	
-	char object_type[5] = { 'W', 'D',  'C','S', 'J'};
+	const char object_type[5] = { 'W', 'D', 'C', 'S', 'J'};
 	for (int i = 0; i < sizeof(object_type); i++) // running through all the tiles on the map
 	{
-		for (auto a : objects[i])
+		for (const auto& a : objects[i])
 		{
-			float hold_cordY;
 			Tmpl8::vec2 pos = { new_coor.x + map.getXoffSet() * TileLength , new_coor.y + map.getYoffSet() * TileLength }; // adding the offset of each axis so it will check collision on the real map coordiantes
 			Tmpl8::vec2 diff = checkCollision(a, pos);
 			if (abs(diff.x) < 0.001)
@@ -439,19 +470,19 @@ void Ball::mapReact(Tmpl8::Surface* screen, TileMaps& map)
 					gravity_switch = false;
 				break;
 			case 'J':
-				if (diff.y < 0) // resolving jump tile interactions
+				if ((diff.y < 0) && dir.y == -1) // resolving jump tile interactions
 					pcord.y += jump_force;
 				break;
 			case 'S': // resolving slow tile interactions
 				// checks the direction and type of collsion to slow the velocity in the right direction
 				// doesn't slow top corner collisions
-				if ((diff.y != 0 && diff.x == 0) || (diff.x != 0 && diff.y > 0))
+				velocityCalc();
+				if (diff.y != 0 && (diff.x == 0) || (diff.x != 0 && !diff.y < 0))
 					pcord.y = (dir.y == 1) ? Tmpl8::Min(coordinates.y - slow_force /2.0f, pcord.y + slow_force) 
 					: Tmpl8::Max(coordinates.y, pcord.y - slow_force);
-				if ((diff.x != 0 && diff.y == 0) || (diff.x != 0 && diff.y > 0))
-					pcord.x = (dir.x == 1) ? Tmpl8::Min(coordinates.x - 0.2f, pcord.x + slow_force) 
-					: Tmpl8::Max(coordinates.x + 0.2f, pcord.x - slow_force);
-				velocityCalc();
+				if (diff.x != 0 && (diff.y == 0) || !((a.y - map.getYoffSet() * 32.0f) > coordinates.y))
+					pcord.x = (dir.x == 1) ? Tmpl8::Min(coordinates.x - velocity.x/4.0f, pcord.x + slow_force) 
+					: Tmpl8::Max(coordinates.x + velocity.x / 4.0f, pcord.x - slow_force);
 				break;
 			case 'D': // resolving death tile interactions
 				dead = true;

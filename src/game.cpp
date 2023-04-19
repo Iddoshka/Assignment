@@ -10,6 +10,7 @@
 
 namespace Tmpl8
 {
+	const std::string diff_line = "easyhard";
 	constexpr float mapHeight = ScreenHeight / TileLength;
 	constexpr float mapWidth = ScreenWidth / TileLength;
 	constexpr float player_start_X = 19; // starting coordinates of the player
@@ -17,20 +18,23 @@ namespace Tmpl8
 	double best_time;
 	uint32_t startTime;
 	const std::vector<char*> map_files = { "world/map1.1.txt","world/map1.2.txt" }; // the two map txt files
-	const std::vector<char*> object_files = { "world/objects1.1.txt","world/objects1.2.txt" }; // the two object txt files 
+	const std::vector<char*> object_files = { "world/objects1.1.txt","world/objects1.2.txt"}; // the two object txt files 
 
 	TileMaps tilemap("assets/nc2tiles.png", (int)mapHeight * 3, (int)mapWidth * 3 * (int)map_files.size()); // the tilemap class object
-	Gun gun1(vec2(81, 250), 4, 2);
+	//Gun gun1(vec2(1189, 540), 16, 2);
+	Gun gun1(vec2(400, 256), 20, 3);
+	std::vector<Gun> guns;
 	Ball player(player_start_X, player_start_Y, 18); // ball class object
 
 	// the flow between states of the state machine
 	void Game::switchState()
-	{ 
+	{
 		switch (state_machine)
 		{
 		case menu:
 			state_machine = play;
 			startTime = (uint32_t)SDL_GetPerformanceCounter();
+			if (difficulty) guns.push_back(gun1);
 			break;
 		case play:
 			state_machine = stop;
@@ -42,18 +46,18 @@ namespace Tmpl8
 			break;
 		}
 	}
-	
+
 	// an object stuct that holds its starting coordinates its length and width and what type of tiles
-	struct obstacles { 
+	struct obstacles {
 		Tmpl8::vec4 obj;
 		char sign;
 	};
 
 	std::vector<obstacles> game_map_objects; // will contain all the objects of the game
-	
+
 	// function opens each map file and stores it in a 2d buffer that will transfer to the tilemap class object
 	void openMap(std::vector<char*> maps)
-	{ 
+	{
 		std::ifstream map_file; // used to open txt files containing the map buffer
 		std::string line;
 		std::vector<std::string> string_map;
@@ -82,8 +86,8 @@ namespace Tmpl8
 	}
 
 	// reseting the player to the start position upon death or reset button pressed
-	void Game::reset(Ball &player)
-	{ 
+	void Game::reset(Ball& player)
+	{
 		gun1.reset();
 		player.setPX(player_start_X);
 		player.setPY(player_start_Y);
@@ -106,7 +110,7 @@ namespace Tmpl8
 	// function opens each object file and stores it in its corrosponding tilemap class object vector
 	void openObjects(std::vector<char*> objects)
 	{
-		
+
 		std::ifstream obj_file; // used to open txt files containing the objects indicators
 		int count_files = 0;
 		std::string line;
@@ -135,11 +139,25 @@ namespace Tmpl8
 
 	void Game::Init()
 	{
-		
+		openMap(map_files);
+		openObjects(object_files);
+	}
+
+	// -----------------------------------------------------------
+	// Close down application
+	// -----------------------------------------------------------
+	void Game::Shutdown()
+	{
+		exit(1);
+	}
+
+	void Game::menuLine()
+	{
 		/*
 		* if the best time isn't changed to the players' best time then it won't print
 		* if it is initialized then it will print the best time and ask if you can do better
 		*/
+		screen->Print(const_cast<char*>(diff_line.substr(difficulty * 4, 4).c_str()), 5, 5, Tmpl8::RedMask , 2);
 		std::ifstream time_file("world/best_time.txt");
 		time_file >> best_time;
 		if (best_time != 19022002)
@@ -147,19 +165,9 @@ namespace Tmpl8
 			std::string line = { "YOUR BEST TIME WAS: " + std::to_string(best_time) + "!" };
 			char* win_line = new char[line.size() + 1];
 			strcpy(win_line, line.c_str());
-			screen->Centre(win_line, 245, Tmpl8::GreenMask , 2);
-			screen->Centre("DO YOU FEEL YOU CAN DO BETTER?", 262, Tmpl8::GreenMask , 2);
+			screen->Centre(win_line, 245, Tmpl8::GreenMask, 2);
+			screen->Centre("DO YOU FEEL YOU CAN DO BETTER?", 262, Tmpl8::GreenMask, 2);
 		}
-		openMap(map_files);
-		openObjects(object_files);
-	}
-	
-	// -----------------------------------------------------------
-	// Close down application
-	// -----------------------------------------------------------
-	void Game::Shutdown()
-	{
-		exit(1);
 	}
 
 	void Game::winningLine()
@@ -202,7 +210,9 @@ namespace Tmpl8
 		uint32_t currTime;
 		switch (state_machine)
 		{
-		case menu:			
+		case menu:	
+			screen->Clear(0);
+			menuLine();
 			screen->Centre("PRESS ENTER TO START!", 210, Tmpl8::GreenMask , 4);
 			if (GetAsyncKeyState(VK_RETURN)) // when enter is pressed then switch to play state
 			{
@@ -218,9 +228,16 @@ namespace Tmpl8
 			else if (player.victory())
 			{ // on win condition after 4 seconds of a printed messege shutdown
 				Sleep(4000);
-				Shutdown();
+				state_machine = menu;
+				player.lose();
+				reset(player);
+				break;
 			}
-			if (GetAsyncKeyState(0X52)) reset(player); // if 'R' key is pressed then reset ball
+			if (GetAsyncKeyState(0X52)) // if 'R' key is pressed then reset ball
+			{
+				startTime = (uint32_t)SDL_GetPerformanceCounter();
+				reset(player);
+			}
 			// clear the graphics window
 			screen->Clear(0);
 			currTime = (uint32_t)SDL_GetPerformanceCounter(); // displaying the current elapsed time
@@ -231,7 +248,7 @@ namespace Tmpl8
 			display_time[7] = '\0';
 			
 			tilemap.mapScroll(screen); // map printing function
-			gun1.render(screen, tilemap, player,startTime);
+			for (auto& a : guns) a.render(screen,tilemap,player,startTime);
 			player.printBall(screen); // ball printing function
 			player.Drive(tilemap); // ball control function
 			player.verlet(tilemap); // ball movement resolution function
@@ -250,6 +267,7 @@ namespace Tmpl8
 			{// winning messege
 				screen->Clear(0);
 				screen->Centre("YOU'VE WON!", 210, Tmpl8::GreenMask, 4);
+				guns.clear();
 				winningLine();
 			}
 			switchState();

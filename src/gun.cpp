@@ -2,10 +2,10 @@
 #include"SDL.h"
 namespace Tmpl8
 {
-	const int a_Width = 58;
-	const int a_Height = 52;
-	const int b_Width = 40;
-	const int b_Height = 40;
+	const int a_Width = 87;
+	const int a_Height = 78;
+	const int b_Width = 60;
+	const int b_Height = 60;
 
 	const unsigned int bullet_speed = 10;
 
@@ -22,13 +22,13 @@ namespace Tmpl8
 	}
 
 	static bool elapesd_time(uint32_t str_time, unsigned int lapse)
-	{ // need to make it work with a double elapsed time!!
+	{
 		if (lapse == 0) return true;
 		uint32_t currTime = SDL_GetPerformanceCounter();
-		int elapsedTime = static_cast<int>(
-			(currTime - str_time) / static_cast<int>(SDL_GetPerformanceFrequency())
+		double elapsedTime = static_cast<double>(
+			(currTime - str_time) / static_cast<double>(SDL_GetPerformanceFrequency())
 			);
-		if (elapsedTime % lapse == 0)
+		if (fmod(elapsedTime, lapse) < 0.1)
 			return true;
 		else
 			return false;
@@ -50,63 +50,90 @@ namespace Tmpl8
 		switch (frame)
 		{
 		case 0: // frame towards north
-			hit_box.push_back(vec4(16.9f, 4.0f, b_Width - (16.9f * 2.0f), b_Height - (4.0f * 2.0f)));
+			hit_box.push_back(vec4(8.45, 2.0f, 3.1f, 16.0f));
 			break;
 		case 1:
-			hit_box.push_back(vec4(20.0f, 2.0f, 8.0f, 8.0f));
-			hit_box.push_back(vec4(17.0f, 10.0f, 7.0f, 12.0f));
-			hit_box.push_back(vec4(14.0f, 22.0f, 4.0f, 8.0f));
-			hit_box.push_back(vec4(12.0f, 30.0f, 4.0f, 6.0f));
+			hit_box.push_back(vec4(10.0f, 1.0f, 4.0f, 4.0f));
+			hit_box.push_back(vec4(8.5f, 5.0f, 3.5f, 6.0f));
+			hit_box.push_back(vec4(7.0f, 11.0f, 2.0f, 4.0f));
+			hit_box.push_back(vec4(6.0f, 15.0f, 2.0f, 3.0f));
 			break;
 		case 2: // frame towards north east
-			hit_box.push_back(vec4(24.0f, 6.0f, 6.0f, 9.0f));
-			hit_box.push_back(vec4(19.0f, 12.0f, 5.0f, 6.0f));
-			hit_box.push_back(vec4(15.0f, 18.0f, 4.0f, 6.0f));
-			hit_box.push_back(vec4(10.0f, 24.0f, 5.0f, 6.0f));
+			hit_box.push_back(vec4(12.0f, 3.0f, 3.0f, 4.5f));
+			hit_box.push_back(vec4(9.5f, 6.0f, 2.5f, 3.0f));
+			hit_box.push_back(vec4(7.5f, 9.0f, 2.0f, 3.0f));
+			hit_box.push_back(vec4(5.0f, 12.0f, 2.5f, 3.0f));
 			break;
 		case 3:
-			hit_box.push_back(vec4(26.0f, 13.0f, 9.0f, 6.0f));
-			hit_box.push_back(vec4(20.0f, 17.0f, 6.0f, 5.0f));
-			hit_box.push_back(vec4(18.0f, 22.0f, 6.0f, 2.0f));
-			hit_box.push_back(vec4(7.0f, 24.0f, 7.0f, 2.0f));
+			hit_box.push_back(vec4(13.0f, 6.5f, 4.5f, 3.0f));
+			hit_box.push_back(vec4(10.0f, 8.5f, 3.0f, 2.5f));
+			hit_box.push_back(vec4(9.0f, 11.0f, 3.0f, 1.0f));
+			hit_box.push_back(vec4(3.5f, 12.0f, 3.5f, 1.0f));
 			break;
 		case 4: // frame towards east
-			hit_box.push_back(vec4(5.0f, 17.6f, 31.0f, 5.9f));
+			hit_box.push_back(vec4(2.5f, 8.8f, 15.5f, 2.95f));
 			break;
 		case 5:
-			hit_box.push_back(vec4(6.0f, 15.0f, 4.0f, 2.0f));
-			hit_box.push_back(vec4(10.0f, 17.0f, 8.0f, 2.0f));
-			hit_box.push_back(vec4(19.0f, 19.0f, 7.0f, 5.0f));
-			hit_box.push_back(vec4(26.0f, 21.0f, 8.0f, 7.0f));
+			hit_box.push_back(vec4(3.0f, 7.5f, 2.0f, 1.0f));
+			hit_box.push_back(vec4(5.0f, 8.5f, 4.0f, 1.0f));
+			hit_box.push_back(vec4(9.5f, 9.5f, 3.5f, 2.5f));
+			hit_box.push_back(vec4(13.0f, 10.5f, 4.0f, 3.5f));
 			break;
 		case 6: // frame towards south east
-			hit_box.push_back(vec4(9.0f, 9.0f, 4.0f, 5.0f));
-			hit_box.push_back(vec4(13.0f, 14.0f, 6.0f, 6.0f));
-			hit_box.push_back(vec4(19.0f, 20.0f, 6.0f, 5.0f));
-			hit_box.push_back(vec4(25.0f, 25.0f, 7.0f, 6.0f));
+			hit_box.push_back(vec4(4.5f, 4.5f, 2.0f, 2.5f));
+			hit_box.push_back(vec4(6.5f, 7.0f, 3.0f, 3.0f));
+			hit_box.push_back(vec4(9.5f, 10.0f, 3.0f, 2.5f));
+			hit_box.push_back(vec4(12.5f, 12.5f, 3.5f, 3.0f));
 			break;
 		case 7: 
-			hit_box.push_back(vec4(21.0f, 26.0f, 7.0f, 11.0f));
-			hit_box.push_back(vec4(18.0f, 18.0f, 6.0f, 8.0f));
-			hit_box.push_back(vec4(15.0f, 10.0f, 3.0f, 8.0f));
-			hit_box.push_back(vec4(13.0f, 6.0f, 3.0f, 4.0f));
+			hit_box.push_back(vec4(6.5f, 3.0f, 1.5f, 2.0f));
+			hit_box.push_back(vec4(7.5f, 5.0f, 1.5f, 4.0f));
+			hit_box.push_back(vec4(9.0f, 9.0f, 3.0f, 4.0f));
+			hit_box.push_back(vec4(10.5f, 13.0f, 3.5f, 5.5f));
 			break;
 		case 8: // frame towards south
-			hit_box.push_back(vec4(16.9f, 4.0f, 6.2f, 32.0f));
+			hit_box.push_back(vec4(8.45, 2.0f, 3.1f, 16.0f));
 			break;
 		case 9:
-			hit_box.push_back(vec4(22.0f, 4.0f, 6.0f, 6.0f));
-			hit_box.push_back(vec4(19.0f, 10.0f, 4.0f, 6.0f));
-			hit_box.push_back(vec4(15.0f, 16.0f, 8.0f, 6.0f));
-			hit_box.push_back(vec4(12.0f, 22.0f, 10.0f, 6.0f));
-			hit_box.push_back(vec4(10.0f, 28.0f, 8.0f, 8.0f));
+			hit_box.push_back(vec4(11.5f, 3.0f, 2.0f, 2.0f));
+			hit_box.push_back(vec4(9.5f, 5.0f, 2.0f, 3.0f));
+			hit_box.push_back(vec4(7.5f, 8.0f, 4.0f, 3.0f));
+			hit_box.push_back(vec4(6.0f, 11.0f, 5.0f, 3.0f));
+			hit_box.push_back(vec4(5.0f, 14.0f, 4.0f, 4.0f));
+			break;
+		case 10: // frame towards south west
+			hit_box.push_back(vec4(12.0f, 4.5f, 2.5f, 2.5f));
+			hit_box.push_back(vec4(9.5f, 7.0f, 2.5f, 3.0f));
+			hit_box.push_back(vec4(6.5f, 10.0f, 3.0f, 2.5f));
+			hit_box.push_back(vec4(3.5f, 12.5f, 3.0f, 3.5f));
+			break;
+		case 11:
+			hit_box.push_back(vec4(14.5f, 12.5f, 2.0f, 1.0f));
+			hit_box.push_back(vec4(10.5f, 8.5f, 4.0f, 1.0f));
+			hit_box.push_back(vec4(7.0f, 9.5f, 3.5f, 2.5f));
+			hit_box.push_back(vec4(2.5f, 10.5f, 4.5f, 3.5f));
+			break;
+		case 12: // frame towards west
+			hit_box.push_back(vec4(1.5f, 8.8f, 15.5f, 2.95f));
+			break;
+		case 13:
+			hit_box.push_back(vec4(2.0f, 6.0f, 4.0f, 3.0f));
+			hit_box.push_back(vec4(6.0f, 8.0f, 3.0f, 2.5f));
+			hit_box.push_back(vec4(9.0f, 9.0f, 3.0f, 2.5f));
+			hit_box.push_back(vec4(12.0f, 11.5f, 3.5f, 1.0f));
+			break;
+		case 14:// frame towards north west
+			hit_box.push_back(vec4(3.0f, 3.0f, 4.0f, 3.5f));
+			hit_box.push_back(vec4(7.0f, 6.5f, 3.5f, 3.5f));
+			hit_box.push_back(vec4(10.5f, 10.0f, 2.0f, 2.0f));
+			hit_box.push_back(vec4(12.5f, 12.0f, 2.0f, 2.0f));
 			break;
 		case 15:
-			hit_box.push_back(vec4(18.0f, 4.0f, 8.0f, 8.0f));
-			hit_box.push_back(vec4(21.0f, 12.0f, 10.0f, 6.0f));
-			hit_box.push_back(vec4(25.0f, 18.0f, 8.0f, 6.0f));
-			hit_box.push_back(vec4(28.0f, 24.0f, 4.0f, 6.0f));
-			hit_box.push_back(vec4(30.0f, 30.0f, 6.0f, 6.0f));
+			hit_box.push_back(vec4(9.0f, 2.0f, 4.0f, 4.0f));
+			hit_box.push_back(vec4(10.5f, 6.0f, 5.0f, 3.0f));
+			hit_box.push_back(vec4(12.5f, 9.0f, 4.0f, 3.0f));
+			hit_box.push_back(vec4(14.0f, 12.0f, 2.0f, 3.0f));
+			hit_box.push_back(vec4(15.0f, 15.0f, 3.0f, 3.0f));
 			break;
 		default:
 			break;
@@ -114,6 +141,7 @@ namespace Tmpl8
 
 		for (vec4& a : hit_box)
 		{
+			a *= (b_Height / 20.0f);
 			a.x += coordinates.x;
 			a.y += coordinates.y;
 		}
@@ -191,6 +219,7 @@ namespace Tmpl8
 	{
 		angle = frame_to_angle(num_frame);
 		coordinates += { In_coordinates.x + b_Height * sin((angle * PI) / 180.0f), In_coordinates.y - b_Height * cosf((angle * PI) / 180.0f) };
+		str_cord = coordinates;
 		frame = angle_to_frame(angle);
 		SetFrame(frame);
 		hit_boxes = hitBox(frame, coordinates);
@@ -213,12 +242,13 @@ namespace Tmpl8
 				return false;
 			}
 		}
-		if (hit_boxes.front().y + hit_boxes.front().w > ScreenHeight || coordinates.y + hit_boxes.back().y < 0 || coordinates.x + hit_boxes.back().x < 0 || hit_boxes.front().x + hit_boxes.front().z >(map.getWidth() / 3.0f) * 32.0f)
+		if ((hit_boxes.back().y + hit_boxes.back().w) > ScreenHeight * (int(str_cord.y / ScreenHeight) + 1) || coordinates.y + hit_boxes.front().y < 0 || 
+			coordinates.x < 0 || coordinates.x + b_Width > (map.getWidth() / 3.0f) * 32.0f)
 			return false;
 
 		DrawScaled(screen, map);
-		for (vec4& a : hit_boxes)
-			screen->Box(a.x, a.y, a.x + a.z, a.y + a.w, GreenMask);
+		for (const vec4& a : hit_boxes) //hit box printer
+			screen->Box(a.x - map.getXoffSet() * (float)TileLength, a.y - map.getYoffSet() * (float)TileLength, (a.x - map.getXoffSet() * (float)TileLength) + a.z, (a.y - map.getYoffSet() * (float)TileLength) + a.w, GreenMask);
 		return true;
 	}
 
