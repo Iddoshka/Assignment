@@ -1,7 +1,6 @@
 #include"player.h"
 #include"game.h"
 
-
 constexpr float gravity = 0.7f; // gravity acceleration const var
 constexpr float air_resistance = 0.005f; // the air resistance const var 
 constexpr float ver_res = 2.0f; // const var that slowls the ball on a vertical collsion
@@ -40,7 +39,7 @@ void Ball::printBall(Tmpl8::Surface* screen)
 // taken from a tutorial on collision between a ball and an AABB object https://learnopengl.com/In-Practice/2D-Game/Collisions/Collision-resolution
 Tmpl8::vec2 Ball::checkCollision(Tmpl8::vec4 coll_obj, Tmpl8::vec2 coor)
 {
-	Tmpl8::vec2 closest; // vec2 var that will hold the closest coordinate on the object to the ball 
+	Tmpl8::vec2 closest; // Tmpl8::vec2 var that will hold the closest coordinate on the object to the ball 
 
 	for (int i = 0; i < 2; i++)
 	{
@@ -52,10 +51,10 @@ Tmpl8::vec2 Ball::checkCollision(Tmpl8::vec4 coll_obj, Tmpl8::vec2 coor)
 		closest = tileCenter + clamped; // clamping the the distance between the center of the ball and the object center on the edge of the object
 
 		/* 
-		 * if the center of the ball is inside the object the closest point will be on the ball's center
-		 * So we move the ball along the velocity vector by ball's radius so the ball's center
-		 * will be outside the object's bounderies
-		 */
+			* if the center of the ball is inside the object the closest point will be on the ball's center
+			* So we move the ball along the velocity vector by ball's radius so the ball's center
+			* will be outside the object's bounderies
+			*/
 		if (coor.x == closest.x && coor.y == closest.y) 
 		{
 			float scale = r / velocity.length();
@@ -100,11 +99,11 @@ Tmpl8::vec2 Ball::findContact(Tmpl8::vec2 diff)
 {	
 	
 	/*
-	 *	the function creates a circle with the same radius as the ball around the closest point of imapct
-	 *	on the AABB object and and the closest intersection point to pcord between the ball and the velocity vector
-	 *	is the coordinate where the ball first collides with the object
-	 *  math taken from here https://mathworld.wolfram.com/Circle-LineIntersection.html#:~:text=In%20geometry%2C%20a%20line%20meeting,429).&text=therefore%20determines%20the%20incidence%20of,summarized%20in%20the%20following%20table
-	 */
+		*	the function creates a circle with the same radius as the ball around the closest point of imapct
+		*	on the AABB object and and the closest intersection point to pcord between the ball and the velocity vector
+		*	is the coordinate where the ball first collides with the object
+		*  math taken from here https://mathworld.wolfram.com/Circle-LineIntersection.html#:~:text=In%20geometry%2C%20a%20line%20meeting,429).&text=therefore%20determines%20the%20incidence%20of,summarized%20in%20the%20following%20table
+		*/
 	Tmpl8::vec2 obj_cord = coordinates - diff;
 	Tmpl8::vec2 cord0 = coordinates - obj_cord;
 	Tmpl8::vec2 pcord0 = pcord - obj_cord;
@@ -125,8 +124,8 @@ Tmpl8::vec2 Ball::findContact(Tmpl8::vec2 diff)
 	Tmpl8::vec2 new_cord = (dist1 > dist2) ? new_cord2 : new_cord1;
 
 	/*
-	 *	calculating new veloctiy using reflection along the normal vector to the corner of the collision 
-	 */
+		*	calculating new veloctiy using reflection along the normal vector to the corner of the collision 
+		*/
 	Tmpl8::vec2 norm = new_cord;
 	aux = (2 * norm.dot(velocity)) / (float)pow(norm.length(),2);
 	Tmpl8::vec2 new_vel = (norm * aux) - velocity;
@@ -325,7 +324,7 @@ void Ball::verlet(TileMaps &map)
 	/*
 	* the function uses the previous position and the current position
 	* using the difference of the two position it calculates the velocity.
-	* I clamp it to the max speed const and using the two positions calculate the direction of the ball
+	* I Clamp it to the Max speed const and using the two positions calculate the direction of the ball
 	* and depending if the ball is placed in the center of the map or is heading towards the edge I add
 	* the newly calculated velocity to the coordinates and place the now previous coordinates at the pcord var
 	*/

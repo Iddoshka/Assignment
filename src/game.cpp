@@ -8,6 +8,7 @@
 #include<istream>
 #include"gun.h"
 
+
 namespace Tmpl8
 {
 	const std::string diff_line = "easyhard";
@@ -22,8 +23,8 @@ namespace Tmpl8
 
 	TileMaps tilemap("assets/nc2tiles.png", (int)mapHeight * 3, (int)mapWidth * 3 * (int)map_files.size()); // the tilemap class object
 	//Gun gun1(vec2(1189, 540), 16, 2);
-	Gun gun1(vec2(400, 256), 20, 3);
-	std::vector<Gun> guns;
+	Gun gun1(vec2(400, 256), 8,7);
+	std::vector<Gun*> guns;
 	Ball player(player_start_X, player_start_Y, 18); // ball class object
 
 	// the flow between states of the state machine
@@ -34,7 +35,7 @@ namespace Tmpl8
 		case menu:
 			state_machine = play;
 			startTime = (uint32_t)SDL_GetPerformanceCounter();
-			if (difficulty) guns.push_back(gun1);
+			if (difficulty) guns.push_back(&gun1);
 			break;
 		case play:
 			state_machine = stop;
@@ -49,7 +50,7 @@ namespace Tmpl8
 
 	// an object stuct that holds its starting coordinates its length and width and what type of tiles
 	struct obstacles {
-		Tmpl8::vec4 obj;
+		vec4 obj;
 		char sign;
 	};
 
@@ -127,7 +128,7 @@ namespace Tmpl8
 				std::getline(obj_file, line);
 				obstacles collider;
 				sscanf(line.c_str(), "%f / %f / %f / %f / %c", &a, &b, &c, &d, &sign);
-				collider.obj = Tmpl8::vec4((a + count_files * mapWidth) * TileLength, b * TileLength, c * TileLength, d * TileLength);
+				collider.obj = vec4((a + count_files * mapWidth) * TileLength, b * TileLength, c * TileLength, d * TileLength);
 				collider.sign = sign;
 				game_map_objects.push_back(collider);
 			}
@@ -157,7 +158,7 @@ namespace Tmpl8
 		* if the best time isn't changed to the players' best time then it won't print
 		* if it is initialized then it will print the best time and ask if you can do better
 		*/
-		screen->Print(const_cast<char*>(diff_line.substr(difficulty * 4, 4).c_str()), 5, 5, Tmpl8::RedMask , 2);
+		screen->Print(const_cast<char*>(diff_line.substr(difficulty * 4, 4).c_str()), 5, 5, RedMask , 2);
 		std::ifstream time_file("world/best_time.txt");
 		time_file >> best_time;
 		if (best_time != 19022002)
@@ -165,8 +166,8 @@ namespace Tmpl8
 			std::string line = { "YOUR BEST TIME WAS: " + std::to_string(best_time) + "!" };
 			char* win_line = new char[line.size() + 1];
 			strcpy(win_line, line.c_str());
-			screen->Centre(win_line, 245, Tmpl8::GreenMask, 2);
-			screen->Centre("DO YOU FEEL YOU CAN DO BETTER?", 262, Tmpl8::GreenMask, 2);
+			screen->Centre(win_line, 245, GreenMask, 2);
+			screen->Centre("DO YOU FEEL YOU CAN DO BETTER?", 262, GreenMask, 2);
 		}
 	}
 
@@ -184,7 +185,7 @@ namespace Tmpl8
 		std::string line = { "YOUR TIME WAS: " + std::to_string(elapsedTime) + "!" };
 		char* win_line = new char[line.size() + 1];
 		strcpy(win_line, line.c_str());
-		screen->Centre(win_line, 245, Tmpl8::GreenMask, 2);
+		screen->Centre(win_line, 245, GreenMask, 2);
 		std::fstream time_file("world/best_time.txt");
 		time_file >> best_time;
 		time_file.close();
@@ -197,23 +198,24 @@ namespace Tmpl8
 		time_file.open("world/master_time.txt");
 		time_file >> best_time;
 		if (best_time > elapsedTime)
-			screen->Centre("FINALLY A WORTHY OPPONENT! YOU BEAT THE MASTER!", 262, Tmpl8::GreenMask , 2);
+			screen->Centre("FINALLY A WORTHY OPPONENT! YOU BEAT THE MASTER!", 262, GreenMask , 2);
 	}
 
 	// -----------------------------------------------------------
 	// Main application tick function
 	// -----------------------------------------------------------
+	char* display_time = new char[8];
+	std::string game_time;
 	void Game::Tick(float deltaTime)
 	{	
-		std::string game_time;
-		char* display_time;
+
 		uint32_t currTime;
 		switch (state_machine)
 		{
 		case menu:	
 			screen->Clear(0);
 			menuLine();
-			screen->Centre("PRESS ENTER TO START!", 210, Tmpl8::GreenMask , 4);
+			screen->Centre("PRESS ENTER TO START!", 210, GreenMask , 4);
 			if (GetAsyncKeyState(VK_RETURN)) // when enter is pressed then switch to play state
 			{
 				switchState();
@@ -243,30 +245,29 @@ namespace Tmpl8
 			currTime = (uint32_t)SDL_GetPerformanceCounter(); // displaying the current elapsed time
 			game_time = std::to_string(ceil(static_cast<double>(
 				(currTime - startTime) / static_cast<double>(SDL_GetPerformanceFrequency())) * 100.0) / 100.0);
-			display_time = new char[8];
 			std::strncpy(display_time, game_time.c_str(),7);
 			display_time[7] = '\0';
 			
 			tilemap.mapScroll(screen); // map printing function
-			for (auto& a : guns) a.render(screen,tilemap,player,startTime);
+			for (Gun* a : guns) (*a).render(screen,tilemap,player,startTime);
 			player.printBall(screen); // ball printing function
 			player.Drive(tilemap); // ball control function
 			player.verlet(tilemap); // ball movement resolution function
 			player.mapReact(screen, tilemap); // map interaction function
-			screen->Print(display_time, 5,5, Tmpl8::RedMask,2);
+			screen->Print(display_time, 5,5, RedMask,2);
 			
 			if (player.isdead() || player.victory()) switchState(); // if death or win conditions are met switch to stop state
 			break;
 		case stop:
 			if (player.isdead())
 			{ // death messege
-				screen->Centre("YOU DIED!", 256, Tmpl8::RedMask, 3);
+				screen->Centre("YOU DIED!", 256, RedMask, 3);
 				reset(player);
 			}
 			if (player.victory())
 			{// winning messege
 				screen->Clear(0);
-				screen->Centre("YOU'VE WON!", 210, Tmpl8::GreenMask, 4);
+				screen->Centre("YOU'VE WON!", 210, GreenMask, 4);
 				guns.clear();
 				winningLine();
 			}

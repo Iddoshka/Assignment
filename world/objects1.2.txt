@@ -16,5 +16,5 @@ strat_X / start_Y / length / height / sign
 16 / 26 / 1 / 1 / j // mid block right level jump tile			{    |mid}
 8 / 26 / 1 / 1 / j // mid block middle level jump tile			{    |mid}
 4 / 15 / 1 / 1 / j // floor jumping tile						{top |   }
-0 / 11 / 1 / 1 / j // jumping tile on the first left side level 		{top V   }
+-1 / 11 / 2 / 1 / j // jumping tile on the first left side level 		{top V   }
 24 / 33 / 1 / 14 / w // winning line						{ map1.2 }
