@@ -1,10 +1,11 @@
+#pragma once
 #include"template.h"
 #include"surface.h"
 #include<iostream>
 #include"tilemap.h"
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#pragma once
+
 
 //this class will be for the player ball
 class Ball

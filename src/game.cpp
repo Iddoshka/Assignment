@@ -1,3 +1,4 @@
+#pragma once
 #include "game.h"
 #include "surface.h"
 #include<windows.h>
@@ -12,6 +13,7 @@
 namespace Tmpl8
 {
 	const std::string diff_line = "easyhard";
+	std::string line;
 	constexpr float mapHeight = ScreenHeight / TileLength;
 	constexpr float mapWidth = ScreenWidth / TileLength;
 	constexpr float player_start_X = 19; // starting coordinates of the player
@@ -20,12 +22,32 @@ namespace Tmpl8
 	uint32_t startTime;
 	const std::vector<char*> map_files = { "world/map1.1.txt","world/map1.2.txt" }; // the two map txt files
 	const std::vector<char*> object_files = { "world/objects1.1.txt","world/objects1.2.txt"}; // the two object txt files 
+	const std::vector<char*> gun_files = { "world/guns_easy.txt","world/guns_hard.txt" }; // the two object txt files 
 
 	TileMaps tilemap("assets/nc2tiles.png", (int)mapHeight * 3, (int)mapWidth * 3 * (int)map_files.size()); // the tilemap class object
 	//Gun gun1(vec2(1189, 540), 16, 2);
 	Gun gun1(vec2(400, 256), 8,7);
-	std::vector<Gun*> guns;
+	std::vector<Gun*> guns[2];
 	Ball player(player_start_X, player_start_Y, 18); // ball class object
+
+	static void openGuns(const std::vector<char*>& a_file)
+	{
+		std::ifstream gun_file;
+		for(int i = 0; i < 2; i++)
+		{
+			gun_file.open(a_file[i]);
+			while (!gun_file.eof())
+			{
+				float a = 0, b = 0;
+				unsigned int c = 0, d = 0;
+				std::getline(gun_file, line);
+				sscanf(line.c_str(), "%f / %f / %i / %i", &a, &b, &c, &d);
+				if(line != "")
+					guns[i].push_back(new Gun(vec2(a, b), c, d));
+			}
+			gun_file.close();
+		}
+	}
 
 	// the flow between states of the state machine
 	void Game::switchState()
@@ -35,7 +57,6 @@ namespace Tmpl8
 		case menu:
 			state_machine = play;
 			startTime = (uint32_t)SDL_GetPerformanceCounter();
-			if (difficulty) guns.push_back(&gun1);
 			break;
 		case play:
 			state_machine = stop;
@@ -59,8 +80,7 @@ namespace Tmpl8
 	// function opens each map file and stores it in a 2d buffer that will transfer to the tilemap class object
 	void openMap(std::vector<char*> maps)
 	{
-		std::ifstream map_file; // used to open txt files containing the map buffer
-		std::string line;
+		std::ifstream map_file; // used to open txt files containing the map buffer		
 		std::vector<std::string> string_map;
 		char** obs;
 		obs = new char* [tilemap.getHeight()];
@@ -89,7 +109,8 @@ namespace Tmpl8
 	// reseting the player to the start position upon death or reset button pressed
 	void Game::reset(Ball& player)
 	{
-		gun1.reset();
+		for(int i = 0; i < difficulty + 1; i++)
+			for(Gun* a : guns[i]) (*a).reset();
 		player.setPX(player_start_X);
 		player.setPY(player_start_Y);
 		player.setX(player_start_X);
@@ -114,7 +135,6 @@ namespace Tmpl8
 
 		std::ifstream obj_file; // used to open txt files containing the objects indicators
 		int count_files = 0;
-		std::string line;
 		for (auto a : object_files)
 		{
 			obj_file.open(a);
@@ -140,6 +160,7 @@ namespace Tmpl8
 
 	void Game::Init()
 	{
+		openGuns(gun_files);
 		openMap(map_files);
 		openObjects(object_files);
 	}
@@ -163,7 +184,7 @@ namespace Tmpl8
 		time_file >> best_time;
 		if (best_time != 19022002)
 		{
-			std::string line = { "YOUR BEST TIME WAS: " + std::to_string(best_time) + "!" };
+			line = { "YOUR BEST TIME WAS: " + std::to_string(best_time) + "!" };
 			char* win_line = new char[line.size() + 1];
 			strcpy(win_line, line.c_str());
 			screen->Centre(win_line, 245, GreenMask, 2);
@@ -182,7 +203,7 @@ namespace Tmpl8
 		double elapsedTime = static_cast<double>(
 			(currTime - startTime) / static_cast<double>(SDL_GetPerformanceFrequency())
 			); // taken from https://seanballais.com/blog/computing-elapsed-time-in-sdl2/
-		std::string line = { "YOUR TIME WAS: " + std::to_string(elapsedTime) + "!" };
+		line = { "YOUR TIME WAS: " + std::to_string(elapsedTime) + "!" };
 		char* win_line = new char[line.size() + 1];
 		strcpy(win_line, line.c_str());
 		screen->Centre(win_line, 245, GreenMask, 2);
@@ -205,7 +226,6 @@ namespace Tmpl8
 	// Main application tick function
 	// -----------------------------------------------------------
 	char* display_time = new char[8];
-	std::string game_time;
 	void Game::Tick(float deltaTime)
 	{	
 
@@ -243,13 +263,14 @@ namespace Tmpl8
 			// clear the graphics window
 			screen->Clear(0);
 			currTime = (uint32_t)SDL_GetPerformanceCounter(); // displaying the current elapsed time
-			game_time = std::to_string(ceil(static_cast<double>(
+			line = std::to_string(ceil(static_cast<double>(
 				(currTime - startTime) / static_cast<double>(SDL_GetPerformanceFrequency())) * 100.0) / 100.0);
-			std::strncpy(display_time, game_time.c_str(),7);
+			std::strncpy(display_time, line.c_str(),7);
 			display_time[7] = '\0';
 			
 			tilemap.mapScroll(screen); // map printing function
-			for (Gun* a : guns) (*a).render(screen,tilemap,player,startTime);
+			for(int i =0; i < difficulty + 1; i++) 
+				for (Gun* a : guns[i]) (*a).render(screen, tilemap, player, startTime);
 			player.printBall(screen); // ball printing function
 			player.Drive(tilemap); // ball control function
 			player.verlet(tilemap); // ball movement resolution function
@@ -268,7 +289,6 @@ namespace Tmpl8
 			{// winning messege
 				screen->Clear(0);
 				screen->Centre("YOU'VE WON!", 210, GreenMask, 4);
-				guns.clear();
 				winningLine();
 			}
 			switchState();

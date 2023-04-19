@@ -1,3 +1,4 @@
+#pragma once
 #include"gun.h"
 #include"SDL.h"
 namespace Tmpl8

@@ -1,8 +1,9 @@
+#pragma once
 #include "surface.h"
 #include "template.h"
 #include<vector>
 
-#pragma once
+
 
 class TileMaps
 {
