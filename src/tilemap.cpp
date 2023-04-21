@@ -72,33 +72,63 @@ void TileMaps::setTile(char* mapAdd, int sizeI, int startX, int startY, char sig
 {// changing the tiles on the map buffer and adding the collider to the class object object vectors depending on the given sign
 	// this function adds a 2d object with a given height of 1
 	startX *= 3;
-	for (int j = startX; j < sizeI + startX; j++)
+	for (int j = startX; j < sizeI + startX; j+= 3)
 	{
 		Map[startY][j] = mapAdd[j - startX];
+		Map[startY][j + 1] = mapAdd[j + 1 - startX];
+		Map[startY][j + 2] = mapAdd[j + 2 - startX];
 	}
 	setColliders((float)(startX / 3 * TileLength), (float)(startY * TileLength), (float)(sizeI * TileLength), (float)TileLength, sign);
 }
-
-
-
+template <typename T>
+static int find(std::vector<T> vec, T to_find)
+{
+	int counter = 0;
+	for (const T& a : vec)
+	{
+		if (to_find == a)
+		{
+			return counter;
+		}
+		counter++;
+	}
+	return -1;
+}
 void TileMaps::setColliders(float strtX, float strtY, float length, float height, char sign)
 { // adds the collider vec4 to the appropriate type vector depending on the given sign
 	switch (sign)
 	{
+	case ' ':
+		/*for (auto& a : std::vector<std::vector<Tmpl8::vec4>>{colliders,jumpers, slowers, deaths, win})
+			if (find(a, Tmpl8::vec4(strtX * 32.0f, strtY * 32.0f, length, height)) != -1)
+			{
+				a.erase(a.begin() + find(a, Tmpl8::vec4(strtX * 32.0f, strtY * 32.0f, length, height)));
+				printf("f");
+			}*/
+		if (find(colliders, Tmpl8::vec4(strtX, strtY , length , height)) != -1)
+			colliders.erase(colliders.begin() + find(colliders, Tmpl8::vec4(strtX, strtY, length, height)));
+		if (find(slowers, Tmpl8::vec4(strtX, strtY, length, height)) != -1)
+			slowers.erase(slowers.begin() + find(slowers, Tmpl8::vec4(strtX, strtY, length, height)));
+		break;
 	case 'x':
-		colliders.push_back(Tmpl8::vec4(strtX, strtY, length, height));
+		if (find(colliders, Tmpl8::vec4(strtX, strtY, length, height)) == -1)
+			colliders.push_back(Tmpl8::vec4(strtX, strtY, length, height));
 		break;
 	case 'j':
-		jumpers.push_back(Tmpl8::vec4(strtX, strtY, length, height));
+		if (find(jumpers, Tmpl8::vec4(strtX, strtY, length, height)) == -1)
+			jumpers.push_back(Tmpl8::vec4(strtX, strtY, length, height));
 		break;
 	case 'd':
-		deaths.push_back(Tmpl8::vec4(strtX, strtY, length, height));
+		if (find(deaths, Tmpl8::vec4(strtX, strtY, length, height)) == -1)
+			deaths.push_back(Tmpl8::vec4(strtX, strtY, length, height));
 		break;
 	case 's':
-		slowers.push_back(Tmpl8::vec4(strtX, strtY, length, height));
+		if (find(slowers, Tmpl8::vec4(strtX, strtY, length, height)) == -1)
+			slowers.push_back(Tmpl8::vec4(strtX, strtY, length, height));
 		break;
 	case 'w':
-		win.push_back(Tmpl8::vec4(strtX, strtY, length, height));
+		if (find(win, Tmpl8::vec4(strtX, strtY, length, height)) == -1)
+			win.push_back(Tmpl8::vec4(strtX, strtY, length, height));
 		break;
 	default:
 		break;

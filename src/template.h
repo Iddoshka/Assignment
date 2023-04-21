@@ -146,6 +146,7 @@ public:
 	void operator -= ( const vec4& a ) { x -= a.x; y -= a.y; z -= a.z; w -= a.w; }
 	void operator += ( const vec4& a ) { x += a.x; y += a.y; z += a.z; w += a.w; }
 	void operator *= ( const vec4& a ) { x *= a.x; y *= a.y; z *= a.z; w *= a.w; }
+	bool operator == (const vec4& a) { return (x == a.x && y == a.y && z == a.z && w == a.w); }
 	void operator *= ( float a ) { x *= a; y *= a; z *= a; w *= a; }
 	float& operator [] ( const int idx ) { return cell[idx]; }
 	float operator [] ( const uint& idx ) const { return cell[idx]; }

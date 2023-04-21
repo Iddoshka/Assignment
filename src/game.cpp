@@ -16,17 +16,15 @@ namespace Tmpl8
 	std::string line;
 	constexpr float mapHeight = ScreenHeight / TileLength;
 	constexpr float mapWidth = ScreenWidth / TileLength;
-	constexpr float player_start_X = 19; // starting coordinates of the player
-	constexpr float player_start_Y = 320;
+	constexpr float player_start_X = 740; // starting coordinates of the player
+	constexpr float player_start_Y = 50;
 	double best_time;
 	uint32_t startTime;
 	const std::vector<char*> map_files = { "world/map1.1.txt","world/map1.2.txt" }; // the two map txt files
-	const std::vector<char*> object_files = { "world/objects1.1.txt","world/objects1.2.txt"}; // the two object txt files 
+	const std::vector<char*> object_files = { "world/objects1.1.txt","world/objects1.2.txt", "world/objects1.3.txt"}; // the two object txt files 
 	const std::vector<char*> gun_files = { "world/guns_easy.txt","world/guns_hard.txt" }; // the two object txt files 
 
 	TileMaps tilemap("assets/nc2tiles.png", (int)mapHeight * 3, (int)mapWidth * 3 * (int)map_files.size()); // the tilemap class object
-	//Gun gun1(vec2(1189, 540), 16, 2);
-	Gun gun1(vec2(400, 256), 8,7);
 	std::vector<Gun*> guns[2];
 	Ball player(player_start_X, player_start_Y, 18); // ball class object
 
@@ -57,6 +55,12 @@ namespace Tmpl8
 		case menu:
 			state_machine = play;
 			startTime = (uint32_t)SDL_GetPerformanceCounter();
+			if (!difficulty) tilemap.setTile("pf ",1,22,21,' ');
+			else
+			{
+				tilemap.setTile("lbx", 1, 22, 21, 'x');
+				tilemap.setColliders(22.0f * TileLength, 21.0f * TileLength, TileLength, TileLength, 's');
+			}
 			break;
 		case play:
 			state_machine = stop;
@@ -109,7 +113,7 @@ namespace Tmpl8
 	// reseting the player to the start position upon death or reset button pressed
 	void Game::reset(Ball& player)
 	{
-		for(int i = 0; i < difficulty + 1; i++)
+		for (int i = 0; i < (difficulty + 1); i++)
 			for(Gun* a : guns[i]) (*a).reset();
 		player.setPX(player_start_X);
 		player.setPY(player_start_Y);
@@ -153,13 +157,14 @@ namespace Tmpl8
 				game_map_objects.push_back(collider);
 			}
 			obj_file.close();
-			count_files += 1;
+			count_files = (count_files + 1) % 2;
 		}
 		setMapObjects(game_map_objects);
 	}
 
 	void Game::Init()
 	{
+		tilemap.setXoffSet(25);
 		openGuns(gun_files);
 		openMap(map_files);
 		openObjects(object_files);

@@ -243,7 +243,7 @@ namespace Tmpl8
 				return false;
 			}
 		}
-		if ((hit_boxes.back().y + hit_boxes.back().w) > ScreenHeight * (int(str_cord.y / ScreenHeight) + 1) || coordinates.y + hit_boxes.front().y < 0 || 
+		if ((hit_boxes.back().y + hit_boxes.back().w) > ScreenHeight * (int(str_cord.y / ScreenHeight) + 1) || coordinates.y < (0 + ScreenHeight * (int(str_cord.y / ScreenHeight))) ||
 			coordinates.x < 0 || coordinates.x + b_Width > (map.getWidth() / 3.0f) * 32.0f)
 			return false;
 

@@ -8,7 +8,7 @@ constexpr float ver_res = 2.0f; // const var that slowls the ball on a vertical 
 constexpr float friction = 0.01f; // friction const var on the horizontal axis
 constexpr float jump_force = 7.0f; // the const var that is added to velocity on a jumping tile
 constexpr float slow_force = 4.0f; // the const var that is subtracted from the velocity on a slowing tile
-constexpr float speed = 0.3; // const var that is added to the horizontal velocity on key press
+constexpr float speed = 0.32; // const var that is added to the horizontal velocity on key press
 constexpr float MAX_SPEED_Y = 18.0f; // the const speed amount that the velocity Y is clamped to
 constexpr float MAX_SPEED_X = 15.0f; // the const speed amount that the velocity X is clamped to
 bool gravity_switch = true;
@@ -291,22 +291,23 @@ void Ball::fixCollision(TileMaps& map, Tmpl8::vec2 newCord)
 		coordinates.x = newCord.x;
 	else
 		map.setXoffSet(map.getXoffSet() + (abs(dist.x) * dir.x) / TileLength);
-	if (!edgeY && (coordinates.y != ScreenHeight - TileLength || coordinates.y != TileLength))
+
+	if (!edgeY && (coordinates.y != (ScreenHeight - (TileLength + r)) && coordinates.y != (TileLength + r)))
 	{
-		if (coordinates.y < ScreenHeight - TileLength && newCord.y > ScreenHeight - TileLength)
+		if (coordinates.y < (ScreenHeight - (TileLength + r)) && newCord.y >(ScreenHeight - (TileLength + r)))
 		{
-			dist.y -= ScreenHeight - TileLength - coordinates.y;
-			coordinates.y = ScreenHeight - TileLength;
+			dist.y -= ScreenHeight - (TileLength + r) - coordinates.y;
+			coordinates.y = ScreenHeight - (TileLength + r);
 			map.setYoffSet(map.getYoffSet() + (dist.y * dir.y) / TileLength);
 		}
 		else if (coordinates.y > TileLength && newCord.y < TileLength)
 		{
-			dist.y -= TileLength - coordinates.y;
-			coordinates.y = TileLength;
+			dist.y -= (TileLength + r) - coordinates.y;
+			coordinates.y = (TileLength + r);
 			map.setYoffSet(map.getYoffSet() + (dist.y * dir.y) / TileLength);
 		}
 	}
-	if (edgeY || (coordinates.y != (TileLength + r) && coordinates.y != ScreenHeight - (TileLength + r)))
+	if (edgeY || (coordinates.y != (TileLength + r) && coordinates.y != (ScreenHeight - (TileLength + r))))
 		coordinates.y = newCord.y;
 	else
 		map.setYoffSet(map.getYoffSet() + (abs(dist.y) * dir.y) / TileLength);
@@ -477,12 +478,12 @@ void Ball::mapReact(Tmpl8::Surface* screen, TileMaps& map)
 				// checks the direction and type of collsion to slow the velocity in the right direction
 				// doesn't slow top corner collisions
 				velocityCalc();
-				if (diff.y != 0 && (diff.x == 0) || (diff.x != 0 && !diff.y < 0))
+				if (diff.y != 0 && (diff.x == 0) || (diff.x != 0 && diff.y > 0))
 					pcord.y = (dir.y == 1) ? Tmpl8::Min(coordinates.y - slow_force /2.0f, pcord.y + slow_force) 
 					: Tmpl8::Max(coordinates.y, pcord.y - slow_force);
 				if (diff.x != 0 && (diff.y == 0) || !((a.y - map.getYoffSet() * 32.0f) > coordinates.y))
-					pcord.x = (dir.x == 1) ? Tmpl8::Min(coordinates.x - velocity.x/4.0f, pcord.x + slow_force) 
-					: Tmpl8::Max(coordinates.x + velocity.x / 4.0f, pcord.x - slow_force);
+					pcord.x = (dir.x == 1) ? Tmpl8::Min(coordinates.x - velocity.x/2.5f, pcord.x + slow_force) 
+					: Tmpl8::Max(coordinates.x + velocity.x / 2.5f, pcord.x - slow_force);
 				break;
 			case 'D': // resolving death tile interactions
 				dead = true;
