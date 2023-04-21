@@ -16,8 +16,8 @@ namespace Tmpl8
 	std::string line;
 	constexpr float mapHeight = ScreenHeight / TileLength;
 	constexpr float mapWidth = ScreenWidth / TileLength;
-	constexpr float player_start_X = 740; // starting coordinates of the player
-	constexpr float player_start_Y = 50;
+	constexpr float player_start_X = 19; // starting coordinates of the player
+	constexpr float player_start_Y = 320;
 	double best_time;
 	uint32_t startTime;
 	const std::vector<char*> map_files = { "world/map1.1.txt","world/map1.2.txt" }; // the two map txt files
@@ -164,8 +164,7 @@ namespace Tmpl8
 
 	void Game::Init()
 	{
-		tilemap.setXoffSet(25);
-		openGuns(gun_files);
+		//openGuns(gun_files);
 		openMap(map_files);
 		openObjects(object_files);
 	}
@@ -233,7 +232,7 @@ namespace Tmpl8
 	char* display_time = new char[8];
 	void Game::Tick(float deltaTime)
 	{	
-
+		printf("%f\n", 1000.0f / deltaTime);
 		uint32_t currTime;
 		switch (state_machine)
 		{

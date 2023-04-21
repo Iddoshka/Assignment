@@ -2,7 +2,6 @@ strat_X / start_Y / length / height / sign
 -2 / 11 / 5 / 1 / x // first left side level					{top |   }
 7 / 8 / 15 / 8 / x // right side big block					{top |   }
 24 / 0 / 1 / 32 / x // right pillar							{top |mid}
-19 / 31 / 6 / 1 / x // mid block first level					{    |mid}
 -3 / 27 / 6 / 5 / x // mid block left block					{    |mid}
 3 / 28 / 4 / 1 / x // mid block lower left mid level				{    |mid}
 0 / 19 / 6 / 5 / x // mid block upper left mid block				{    |mid}
