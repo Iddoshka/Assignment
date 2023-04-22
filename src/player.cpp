@@ -28,12 +28,12 @@ void Ball::printBall(Tmpl8::Surface* screen)
 {
 	ball_sprite.SetFrame(roundf((float)((int)this->ball_sprite.GetSurface()->GetAngle() % 360) / 90.0f));
 	ball_sprite.DrawScaled((int)coordinates.x - r, (int)coordinates.y - r, r * 2, r * 2, screen);
-	for (int i = 0; i < 64; i++)
+	/*for (int i = 0; i < 64; i++)
 	{
 		float r1 = (float)i * Tmpl8::PI / TileLength, r2 = (float)(i + 1) * Tmpl8::PI / TileLength;
 		screen->Line(coordinates.x - r * sinf(r1), coordinates.y - r * cosf(r1),
 			coordinates.x - r * sinf(r2), coordinates.y - r * cosf(r2), 0x84898b); // silver color
-	}// printing circumference of the ball
+	}*/// printing circumference of the ball
 }
 
 // checking collision between the ball and an AABB object and returns the distance between the center of the ball to the edge of the object
@@ -279,35 +279,39 @@ void Ball::fixCollision(TileMaps& map, Tmpl8::vec2 newCord)
 	Tmpl8::vec2 dist(coordinates - newCord);
 	if(!edgeX && coordinates.x != ScreenWidth / 2)
 	{
-		if (coordinates.x < ScreenWidth / 2 && newCord.x > ScreenWidth / 2 ||
-			coordinates.x > ScreenWidth / 2 && newCord.x < ScreenWidth / 2)
+		if (coordinates.x < (ScreenWidth / 2) && newCord.x >= (ScreenWidth / 2) ||
+			coordinates.x > (ScreenWidth / 2) && newCord.x <= (ScreenWidth / 2))
 		{
 			dist.x -= ScreenWidth / 2 - coordinates.x;
 			coordinates.x = ScreenWidth / 2.0f;
 			map.setXoffSet(map.getXoffSet() + (dist.x * dir.x) / TileLength);
 		}
+		else
+			coordinates.x = newCord.x;
 	}
-	if (edgeX || coordinates.x != ScreenWidth / 2)
+	else if (edgeX || coordinates.x != ScreenWidth / 2)
 		coordinates.x = newCord.x;
 	else
 		map.setXoffSet(map.getXoffSet() + (abs(dist.x) * dir.x) / TileLength);
 
 	if (!edgeY && (coordinates.y != (ScreenHeight - (TileLength + r)) && coordinates.y != (TileLength + r)))
 	{
-		if (coordinates.y < (ScreenHeight - (TileLength + r)) && newCord.y >(ScreenHeight - (TileLength + r)))
+		if (coordinates.y < (ScreenHeight - (TileLength + r)) && newCord.y >= (ScreenHeight - (TileLength + r)))
 		{
 			dist.y -= ScreenHeight - (TileLength + r) - coordinates.y;
 			coordinates.y = ScreenHeight - (TileLength + r);
 			map.setYoffSet(map.getYoffSet() + (dist.y * dir.y) / TileLength);
 		}
-		else if (coordinates.y > TileLength && newCord.y < TileLength)
+		else if (coordinates.y > (TileLength + r) && newCord.y <= (TileLength + r))
 		{
 			dist.y -= (TileLength + r) - coordinates.y;
 			coordinates.y = (TileLength + r);
 			map.setYoffSet(map.getYoffSet() + (dist.y * dir.y) / TileLength);
 		}
+		else
+			coordinates.y = newCord.y;
 	}
-	if (edgeY || (coordinates.y != (TileLength + r) && coordinates.y != (ScreenHeight - (TileLength + r))))
+	else if (edgeY || (coordinates.y != (TileLength + r) && coordinates.y != (ScreenHeight - (TileLength + r))))
 		coordinates.y = newCord.y;
 	else
 		map.setYoffSet(map.getYoffSet() + (abs(dist.y) * dir.y) / TileLength);
@@ -461,7 +465,7 @@ void Ball::mapReact(Tmpl8::Surface* screen, TileMaps& map)
 					newCord = linearFunc(diff);
 					fixCollision(map, newCord);
 					//if the resistnace is greater than the velocity then the velocity is equivelant to zero
-					if (abs(velocity.y) <= ver_res)
+					if (abs(velocity.y) <= ver_res && diff.y != 0)
 						velocity.y = 0;
 					pcord = { coordinates.x - velocity.x ,coordinates.y - velocity.y };
 				}

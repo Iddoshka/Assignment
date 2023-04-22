@@ -37,11 +37,15 @@ namespace Tmpl8
 
 	static bool on_screen(TileMaps map, vec2 coordinates, int width, int height)
 	{
-		if ((map.getXoffSet() * TileLength) > (coordinates.x + width) || (map.getXoffSet() * TileLength + ScreenWidth) < coordinates.x)
-			return false;
+		bool x = false;
+		bool y = false;
+		if ((map.getXoffSet() * TileLength) < (coordinates.x + width) && (map.getXoffSet() * TileLength + ScreenWidth) > coordinates.x)
+			x = true;
 
-		if ((map.getYoffSet() * TileLength) > (coordinates.y + height) || (map.getYoffSet() * TileLength + ScreenHeight) < coordinates.y)
-			return false;
+		if ((map.getYoffSet() * TileLength) < (coordinates.y + height) && (map.getYoffSet() * TileLength + ScreenHeight) > coordinates.y)
+			y = true;
+
+		return (x && y);
 	}
 
 	static std::vector<vec4> hitBox(unsigned int frame, vec2 coordinates)
@@ -175,7 +179,6 @@ namespace Tmpl8
 
 	void Gun::render(Surface* screen, TileMaps map, Ball& player, uint32_t str_time)
 	{
-		shoot(player, screen, map, str_time);
 		if (!on_screen(map, coordinates, a_Width, a_Height))
 			return;
 		/*if ((map.getXoffSet() * TileLength) > (coordinates.x + a_Width) || (map.getXoffSet() * TileLength + ScreenWidth) < coordinates.x)
@@ -183,7 +186,7 @@ namespace Tmpl8
 
 		if ((map.getYoffSet() * TileLength) > (coordinates.y + a_Height) || (map.getYoffSet() * TileLength + ScreenHeight) < coordinates.y)
 			return;*/
-
+		shoot(player, screen, map, str_time);
 		DrawScaled(screen, map);
 	}
 
@@ -228,10 +231,16 @@ namespace Tmpl8
 
 	bool Bullet::fly(Ball& player, Surface* screen, TileMaps map)
 	{
+		if(!on_screen(map,coordinates,b_Width,b_Height))
+			return false;
 		vec2 vel = { sin((angle * PI) / 180.0f) * bullet_speed , cosf((angle * PI) / 180.0f) * bullet_speed };
 		vel.x = (abs(vel.x) < 0.01) ? 0 : vel.x;
 		vel.y = (abs(vel.y) < 0.01) ? 0 : -vel.y;
 		coordinates += vel;
+		if ((hit_boxes.back().y + hit_boxes.back().w) > ScreenHeight * (int(str_cord.y / ScreenHeight) + 1) || coordinates.y < (0 + ScreenHeight * (int(str_cord.y / ScreenHeight))) ||
+			coordinates.x < 0 || coordinates.x + b_Width >(map.getWidth() / 3.0f) * 32.0f)
+			return false;
+		DrawScaled(screen, map);
 		for (vec4& a : hit_boxes)
 		{
 			a.x += vel.x;
@@ -243,14 +252,9 @@ namespace Tmpl8
 				return false;
 			}
 		}
-		if ((hit_boxes.back().y + hit_boxes.back().w) > ScreenHeight * (int(str_cord.y / ScreenHeight) + 1) || coordinates.y < (0 + ScreenHeight * (int(str_cord.y / ScreenHeight))) ||
-			coordinates.x < 0 || coordinates.x + b_Width > (map.getWidth() / 3.0f) * 32.0f)
-			return false;
-
-		DrawScaled(screen, map);
-		for (const vec4& a : hit_boxes) //hit box printer
+		/*for (const vec4& a : hit_boxes) //hit box printer
 			screen->Box(a.x - map.getXoffSet() * (float)TileLength, a.y - map.getYoffSet() * (float)TileLength, (a.x - map.getXoffSet() * (float)TileLength) + a.z, (a.y - map.getYoffSet() * (float)TileLength) + a.w, GreenMask);
-		return true;
+		return true;*/
 	}
 
 	void Bullet::DrawScaled(Surface* screen, TileMaps map)

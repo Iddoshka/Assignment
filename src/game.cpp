@@ -73,6 +73,12 @@ namespace Tmpl8
 		}
 	}
 
+	void Game::setState(states stateIn) 
+	{ 
+		state_machine = stateIn;
+		reset(player);
+	}
+
 	// an object stuct that holds its starting coordinates its length and width and what type of tiles
 	struct obstacles {
 		vec4 obj;
@@ -164,7 +170,7 @@ namespace Tmpl8
 
 	void Game::Init()
 	{
-		//openGuns(gun_files);
+		openGuns(gun_files);
 		openMap(map_files);
 		openObjects(object_files);
 	}
@@ -232,7 +238,6 @@ namespace Tmpl8
 	char* display_time = new char[8];
 	void Game::Tick(float deltaTime)
 	{	
-		printf("%f\n", 1000.0f / deltaTime);
 		uint32_t currTime;
 		switch (state_machine)
 		{
