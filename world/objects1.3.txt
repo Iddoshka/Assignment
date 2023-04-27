@@ -1,0 +1,11 @@
+strat_X / start_Y / length / height / sign
+18 / 43 / 5 / 1 / x // last block the letter 'E' bottom level
+27 / 39 / 5 / 1 / x // last block the letter 'E' middle level
+34 / 35 / 6 / 1 / x // last block the letter 'N' upper level
+42 / 43 / 6 / 1 / x // last block the letter 'O' bottom level
+14 / 47 / 3 / 1 / j // last block 3 tile jump tiles
+22 / 43 / 1 / 1 / j // last block first letter 'E' jump tile
+49 / 47 / 2 / 1 / j // last block 2 tile jump tiles
+31 / 39 / 1 / 1 / j // last block second letter 'E' jump tile
+24 / 47 / 2 / 1 / j // last block middle sentence jump tile
+34 / 47 / 15 / 1 / d // last block water death tiles
