@@ -44,11 +44,13 @@ void TileMaps::setTile(char** mapAdd, int sizeI, int sizeJ, int startX, int star
 { // changing the tiles on the map buffer and adding the collider to the class object object vectors depending on the given sign
 	// this function adds a 2d object
 	startX *= 3;
+	sizeJ *= 3;
+	int mapAdd_size = sizeof(mapAdd) / sizeof(mapAdd[0]);
 	for (int i = startY; i < sizeI + startY; i++)
 	{
 		for (int j = startX; j < sizeJ + startX; j++)
 		{
-			Map[i][j] = mapAdd[i - startY][j - startX];
+			Map[i][j] = mapAdd[(i - startY) % mapAdd_size][j - startX];
 		}
 	}
 	setColliders((float)(startX / 3 * TileLength), (float)(startY * TileLength), (float)((sizeJ / 3) * TileLength), (float)(sizeI * TileLength), sign);
@@ -56,9 +58,10 @@ void TileMaps::setTile(char** mapAdd, int sizeI, int sizeJ, int startX, int star
 
 void TileMaps::setTile(char** mapAdd, int sizeI, int sizeJ, int startX, int startY)
 {// changing the tiles on the map buffer 
-	// this function adds a 2d object
+	// this function does'nt add a 2d object
 	
 	startX *= 3;
+
 	for (int i = startY; i < sizeI + startY; i++)
 	{
 		for (int j = startX; j < sizeJ + startX; j++)
@@ -198,4 +201,11 @@ void TileMaps::mapScroll(Tmpl8::Surface* screen)
 			DrawTile(tx, ty, screen, posX, posY,precY,startY,precX,startX); // drawing the tile
 		}
 	}
+}
+
+void TileMaps::cleanup()
+{
+	for (int i = 0; i < height; i++) // cleanup
+		delete Map[i];
+	delete Map;
 }

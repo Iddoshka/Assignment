@@ -407,6 +407,8 @@ int main( int argc, char **argv )
 			}
 		}
 	}
+	//cleanup
+	game->cleanup();
 	game->Shutdown();
 	SDL_Quit();
 	return 0;

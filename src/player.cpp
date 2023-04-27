@@ -2,6 +2,7 @@
 #include"player.h"
 #include"game.h"
 
+
 constexpr float gravity = 0.7f; // gravity acceleration const var
 constexpr float air_resistance = 0.005f; // the air resistance const var 
 constexpr float ver_res = 2.0f; // const var that slowls the ball on a vertical collsion
@@ -26,14 +27,8 @@ Ball::Ball(float xIn, float yIn, int rIn)
 // printing the ball on the screen
 void Ball::printBall(Tmpl8::Surface* screen) 
 {
-	ball_sprite.SetFrame(roundf((float)((int)this->ball_sprite.GetSurface()->GetAngle() % 360) / 90.0f));
+	ball_sprite.SetFrame((unsigned int)roundf((float)((int)this->ball_sprite.GetSurface()->GetAngle() % 360) / 90.0f));
 	ball_sprite.DrawScaled((int)coordinates.x - r, (int)coordinates.y - r, r * 2, r * 2, screen);
-	/*for (int i = 0; i < 64; i++)
-	{
-		float r1 = (float)i * Tmpl8::PI / TileLength, r2 = (float)(i + 1) * Tmpl8::PI / TileLength;
-		screen->Line(coordinates.x - r * sinf(r1), coordinates.y - r * cosf(r1),
-			coordinates.x - r * sinf(r2), coordinates.y - r * cosf(r2), 0x84898b); // silver color
-	}*/// printing circumference of the ball
 }
 
 // checking collision between the ball and an AABB object and returns the distance between the center of the ball to the edge of the object
@@ -239,7 +234,7 @@ void Ball::positioningY(TileMaps& map, bool edgeY)
 	*/
 	if ((coordinates.y != (TileLength + r) && coordinates.y != ScreenHeight - (TileLength + r)) && !edgeY)
 	{
-		if (((coordinates.y > ScreenHeight - (TileLength + r)) && (pcord.y < ScreenHeight - (TileLength + r))) && velocity.y > 0)
+		if (((coordinates.y > (ScreenHeight - (TileLength + r))) && (pcord.y < ScreenHeight - (TileLength + r))) && velocity.y > 0)
 		{ //if the ball has passed the thresholds of the screen than he is placed in the correct position and add the remaining velocity to the vertical offset
 			map.setYoffSet(map.getYoffSet() + ((ScreenHeight - (TileLength + r)) - coordinates.y) / (float)TileLength);
 			coordinates.y = ScreenHeight - ((float)TileLength + r);
@@ -299,13 +294,13 @@ void Ball::fixCollision(TileMaps& map, Tmpl8::vec2 newCord)
 		if (coordinates.y < (ScreenHeight - (TileLength + r)) && newCord.y >= (ScreenHeight - (TileLength + r)))
 		{
 			dist.y -= ScreenHeight - (TileLength + r) - coordinates.y;
-			coordinates.y = ScreenHeight - (TileLength + r);
+			coordinates.y = (float)(ScreenHeight - (TileLength + r));
 			map.setYoffSet(map.getYoffSet() + (dist.y * dir.y) / TileLength);
 		}
 		else if (coordinates.y > (TileLength + r) && newCord.y <= (TileLength + r))
 		{
 			dist.y -= (TileLength + r) - coordinates.y;
-			coordinates.y = (TileLength + r);
+			coordinates.y = (float)(TileLength + r);
 			map.setYoffSet(map.getYoffSet() + (dist.y * dir.y) / TileLength);
 		}
 		else
@@ -355,9 +350,25 @@ void Ball::verlet(TileMaps &map)
 	float resistance = (collision) ? air_resistance + (friction * abs(velocity.x)): air_resistance;
 	if (gravity_switch)// adding gravity to the vertical velocity
 		if (edgeY || (coordinates.y != (TileLength + r) && coordinates.y != ScreenHeight - (TileLength + r)))
-			coordinates.y += gravity;
+		{
+			if (coordinates.y < (ScreenHeight - (TileLength + r)) && (coordinates.y + gravity) >= (ScreenHeight - (TileLength + r)))
+			{
+				map.setYoffSet(map.getYoffSet() + ((ScreenHeight - (TileLength + r)) - coordinates.y) / (float)TileLength);
+				coordinates.y = ScreenHeight - ((float)TileLength + r);
+			}
+			else if (coordinates.y > (ScreenHeight - (TileLength + r)) && (coordinates.y + gravity) <= (ScreenHeight - (TileLength + r)))
+			{
+				map.setYoffSet(map.getYoffSet() + ((TileLength + r) - coordinates.y) / (float)TileLength);
+				coordinates.y = (float)(TileLength + r);
+			}
+			else
+				coordinates.y += gravity;
+		}
 		else
+		{
+			pcord.y -= gravity;
 			map.setYoffSet(map.getYoffSet() + gravity / TileLength);
+		}
 	else // adding resistance to the vertical velocity
 	{
 		if (velocity.y > 0)

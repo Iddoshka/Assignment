@@ -1,6 +1,9 @@
 #pragma once
 #include"gun.h"
 #include"SDL.h"
+
+//#define HITBOX
+
 namespace Tmpl8
 {
 	const int a_Width = 87;
@@ -12,7 +15,7 @@ namespace Tmpl8
 
 	static unsigned int angle_to_frame(unsigned int angle)
 	{
-		unsigned int frame = roundf((angle % 360) / 22.5f);
+		unsigned int frame = (unsigned int)roundf((angle % 360) / 22.5f);
 		return frame;
 	}
 
@@ -22,10 +25,10 @@ namespace Tmpl8
 		return angle;
 	}
 
-	static bool elapesd_time(uint32_t str_time, unsigned int lapse)
+	static bool elapesd_time(uint32_t str_time, double lapse)
 	{
 		if (lapse == 0) return true;
-		uint32_t currTime = SDL_GetPerformanceCounter();
+		uint32_t currTime = (uint32_t)SDL_GetPerformanceCounter();
 		double elapsedTime = static_cast<double>(
 			(currTime - str_time) / static_cast<double>(SDL_GetPerformanceFrequency())
 			);
@@ -181,11 +184,7 @@ namespace Tmpl8
 	{
 		if (!on_screen(map, coordinates, a_Width, a_Height))
 			return;
-		/*if ((map.getXoffSet() * TileLength) > (coordinates.x + a_Width) || (map.getXoffSet() * TileLength + ScreenWidth) < coordinates.x)
-			return;
-
-		if ((map.getYoffSet() * TileLength) > (coordinates.y + a_Height) || (map.getYoffSet() * TileLength + ScreenHeight) < coordinates.y)
-			return;*/
+		
 		shoot(player, screen, map, str_time);
 		DrawScaled(screen, map);
 	}
@@ -194,9 +193,12 @@ namespace Tmpl8
 	{
 		if (fired)
 		{
-			fired = (*casing).fly(player, screen, map);
+			fired = casing->fly(player, screen, map);
 			if (!fired)
-				(*casing).~Bullet();
+			{
+				delete casing;
+				casing = NULL;
+			}
 		}
 		else
 		{
@@ -212,8 +214,8 @@ namespace Tmpl8
 	{
 		if (fired)
 		{
-			//(*casing).GetSurface()->~Surface();
-			(*casing).~Bullet();
+			delete casing;
+			casing = NULL;
 			fired = false;
 		}
 	}
@@ -252,9 +254,17 @@ namespace Tmpl8
 				return false;
 			}
 		}
-		/*for (const vec4& a : hit_boxes) //hit box printer
-			screen->Box(a.x - map.getXoffSet() * (float)TileLength, a.y - map.getYoffSet() * (float)TileLength, (a.x - map.getXoffSet() * (float)TileLength) + a.z, (a.y - map.getYoffSet() * (float)TileLength) + a.w, GreenMask);
-		return true;*/
+
+#ifdef HITBOX
+		for (const vec4& a : hit_boxes) //hit box printer
+			screen->Box((int)(a.x - map.getXoffSet() * TileLength), 
+						(int)(a.y - map.getYoffSet() * TileLength), 
+						(int)((a.x - map.getXoffSet() * TileLength) + a.z),
+						(int)((a.y - map.getYoffSet() * TileLength) + a.w),
+						GreenMask);
+#endif // HITBOX
+
+		return true;
 	}
 
 	void Bullet::DrawScaled(Surface* screen, TileMaps map)

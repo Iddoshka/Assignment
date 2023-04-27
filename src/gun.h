@@ -20,7 +20,6 @@ namespace Tmpl8
 		vec2 coordinates;
 		unsigned int frame;
 		double lapse;
-		unsigned int shot_frame;
 		Bullet* casing;
 		bool fired = false;
 		void shoot(Ball& player, Surface* screen, TileMaps map, uint32_t str_time);

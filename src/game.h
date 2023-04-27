@@ -3,6 +3,7 @@
 #include"player.h"
 #include"SDL.h"
 
+
 namespace Tmpl8 {
 
 enum states
@@ -33,7 +34,8 @@ public:
 	void KeyDown(int key) { /* implement if you want to handle keys */ }
 	void switchState();
 	states currentState() { return state_machine; }
-	void setState(states stateIn);
+	void setState(const states& stateIn);
+	void cleanup();
 private:
 	Surface* screen;
 	states state_machine = menu; // holds the current state
