@@ -21,7 +21,6 @@
 #include <corecrt_math.h>
 #include <SDL.h>
 #include "surface.h"
-#include<vector>
 #include <cstdio>
 #include <iostream>
 #define WIN32_LEAN_AND_MEAN
@@ -37,52 +36,8 @@ extern "C"
 #include "wglext.h"
 #endif
 
-
 namespace Tmpl8 { 
-	vec2 vectorRectangleIntersection(vec2 p, vec2 d, vec4 rect)
-	{
-		std::vector<vec2> intersection;
 
-		// find intersection points with each side of the rectangle
-		vec4 left_edge(rect.x, rect.y, rect.x, rect.y + rect.z);
-		vec4 right_edge(rect.x + rect.w, rect.y, rect.x + rect.w, rect.y + rect.z);
-		vec4 top_edge(rect.x, rect.y, rect.x + rect.w, rect.y);
-		vec4 bottom_edge(rect.x, rect.y + rect.z, rect.x + rect.w, rect.y + rect.z);
-		for (auto edge : { left_edge, right_edge, top_edge, bottom_edge })
-		{
-			vec2 inter_point = vectorIntersection(p, d, vec2(edge.x, edge.y), vec2(edge.w, edge.z));
-			if (!isnan(inter_point.x) && rect.x <= inter_point.x && inter_point.x <= (rect.x + rect.w) && rect.y <= inter_point.y && inter_point.y <= (rect.y + rect.z))
-			{
-				intersection.push_back(inter_point);
-			}
-		}
-		vec2 smallest(abs(p.x - intersection[0].x), abs(p.y - intersection[0].y));
-		for (auto a : intersection)
-		{
-			if (smallest.x > abs(p.x - a.x) && smallest.y > abs(p.y - a.y))
-				smallest = a;
-		}
-		return smallest;
-	}
-
-	vec2 vectorIntersection(vec2 d1, vec2 d2, vec2 p1, vec2 p2)
-	{
-		// calculate the determinant of the coefficient matrix
-		float det = d1.x * d2.y - d1.y * d2.x;
-
-		// check if the vectors are parallel
-		if (det == 0)
-			return vec2(NAN, NAN);
-
-		// calculate the scalar parameters of the intersection point
-		float t1 = (d1.x * (p1.y - p2.y) - d1.y * (p1.x - p2.x)) / det;
-		float t2 = (d2.x * (p1.y - p2.y) - d2.y * (p1.x - p2.x)) / det;
-
-		float x = p1.x + d1.x * t1;
-		float y = p1.y + d1.y * t1;
-
-		return vec2(x, y);
-	}
 double timer::inv_freq = 1;
 
 timer::timer(): start(get())
@@ -136,7 +91,6 @@ vec4 operator * ( const vec4& v, const mat4& M )
 	vec4 mw( M.cell[3], M.cell[7], M.cell[11], M.cell[15] );
 	return v.x * mx + v.y * my + v.z * mz + v.w * mw;
 }
-
 
 mat4::mat4()
 {
@@ -400,7 +354,7 @@ int main( int argc, char **argv )
 			}
 		}
 		SDL_UnlockTexture( frameBuffer );
-		SDL_RenderCopyEx(renderer, frameBuffer, NULL, NULL, surface->GetAngle(), NULL, SDL_FLIP_NONE);
+		SDL_RenderCopy( renderer, frameBuffer, NULL, NULL );
 		SDL_RenderPresent( renderer );
 	#endif
 		if (firstframe)
@@ -425,7 +379,13 @@ int main( int argc, char **argv )
 			case SDL_KEYDOWN:
 				if (event.key.keysym.sym == SDLK_ESCAPE) 
 				{
-					exitapp = 1;
+					if (game->currentState() == play || game->currentState() == stop)
+					{
+						game->setState(menu);
+					}
+
+					else
+						exitapp = 1;
 					// find other keys here: http://sdl.beuc.net/sdl.wiki/SDLKey
 				}
 				game->KeyDown( event.key.keysym.scancode );
@@ -447,6 +407,8 @@ int main( int argc, char **argv )
 			}
 		}
 	}
+	//cleanup
+	game->cleanup();
 	game->Shutdown();
 	SDL_Quit();
 	return 0;

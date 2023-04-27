@@ -28,13 +28,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\game.cpp" />
+    <ClCompile Include="src\gun.cpp" />
     <ClCompile Include="src\player.cpp" />
     <ClCompile Include="src\surface.cpp" />
     <ClCompile Include="src\template.cpp" />
     <ClCompile Include="src\tilemap.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\bullet.h" />
     <ClInclude Include="src\game.h" />
+    <ClInclude Include="src\gun.h" />
     <ClInclude Include="src\player.h" />
     <ClInclude Include="src\surface.h" />
     <ClInclude Include="src\template.h" />

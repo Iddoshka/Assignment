@@ -1,8 +1,9 @@
+#pragma once
 #include "surface.h"
 #include "template.h"
 #include<vector>
 
-#pragma once
+
 
 class TileMaps
 {
@@ -37,7 +38,7 @@ public:
 	void printMap(); // printing the char buffer to the debug window function
 	void DrawTile(int tx, int ty, Tmpl8::Surface* screen, int x, int y);
 	void DrawTile(int tx, int ty, Tmpl8::Surface* screen, int x, int y, float precY, int startY, float precX, int startX);
-
+	void cleanup();
 private:
 	float XoffSet; // X axis offset var
 	float YoffSet; // Y axis offset var
