@@ -36,6 +36,28 @@ namespace Tmpl8
 	TileMaps tilemap("assets/nc2tiles.png", (int)mapHeight * 3, (int)mapWidth * 3 * (int)map_files.size()); // the tilemap class object
 	static std::vector<Gun*> guns[2];
 	Ball player(player_start_X, player_start_Y, 18); // ball class object
+	Surface* menu_screen = new Surface("assets/menu.png");
+
+	static double elapsedTime()
+	{
+		uint32_t currTime = (uint32_t)SDL_GetPerformanceCounter();
+		double elapsed_time = static_cast<double>(
+			(currTime - startTime) / static_cast<double>(SDL_GetPerformanceFrequency())
+			); // taken from https://seanballais.com/blog/computing-elapsed-time-in-sdl2/
+		return elapsed_time;
+	}
+
+	static void printMenuScreen(Surface* screen)
+	{
+		Pixel* dst = screen->GetBuffer();
+		for (int i = 0; i < ScreenWidth; i++)
+		{
+			for (int j = 0; j < ScreenHeight; j++)
+			{
+				dst[i + j * ScreenWidth] = menu_screen->GetBuffer()[i + j * ScreenWidth];
+			}
+		}
+	}
 
 	static void openGuns(const std::vector<char*>& a_file)
 	{
@@ -62,7 +84,6 @@ namespace Tmpl8
 
 	void Game::cleanup()
 	{
-		
 		for (int i = 0; i < 2; i++)
 		{
 			delete eazyblock[i];
@@ -72,6 +93,7 @@ namespace Tmpl8
 			}
 		}
 		tilemap.cleanup();
+		delete menu_screen;
 	}
 
 	// the flow between states of the state machine
@@ -95,11 +117,6 @@ namespace Tmpl8
 			}
 			break;
 		case play:
-			if (player.victory())
-			{
-				state_machine = menu;
-				break;
-			}
 			state_machine = stop;
 			break;
 		case stop:
@@ -169,7 +186,7 @@ namespace Tmpl8
 			tilemap.setColliders(a.obj.x, a.obj.y, a.obj.z, a.obj.w, a.sign);
 		}
 	}
-
+	
 	// function opens each object file and stores it in its corrosponding tilemap class object vector
 	void openObjects(const std::vector<char*>& objects)
 	{
@@ -227,7 +244,7 @@ namespace Tmpl8
 		screen->Print(const_cast<char*>(diff_line.substr(difficulty * 4, 4).c_str()), 5, 5, RedMask , 2);
 		std::ifstream time_file("world/best_time.txt");
 		time_file >> best_time;
-		for (int i = 0; i < difficulty; i++)
+		for (unsigned int i = 0; i < difficulty; i++)
 		{
 			time_file >> best_time;
 		}
@@ -249,32 +266,31 @@ namespace Tmpl8
 		* if the elapsed time is faster then best time then
 		* it will rewrite the best time in the txt file and print the best time
 		*/
-		uint32_t currTime = (uint32_t)SDL_GetPerformanceCounter();
-		double elapsedTime = static_cast<double>(
-			(currTime - startTime) / static_cast<double>(SDL_GetPerformanceFrequency())
-			); // taken from https://seanballais.com/blog/computing-elapsed-time-in-sdl2/
-		line = { "YOUR TIME WAS: " + std::to_string(elapsedTime) + "!" };
+		double elapsed_time = elapsedTime();
+		line = { "YOUR TIME WAS: " + std::to_string(elapsed_time) + "!" };
 		char* win_line = new char[line.size() + 1];
 		strcpy(win_line, line.c_str());
 		screen->Centre(win_line, 245, GreenMask, 2);
 		delete win_line;
-
 		std::ifstream time_file("world/best_time.txt");
-		std::string text(
-			(std::istreambuf_iterator<char>(time_file)),
-			std::istreambuf_iterator<char>());
-		time_file.close();
-		std::string replace = std::to_string(elapsedTime);
-		
-		text.replace(difficulty * 11 , replace.length(), replace);
-		
-		std::ofstream fout("world/best_time.txt", std::ios::trunc);
-		fout << text;
-		fout.close();
+		if(elapsed_time < best_time)
+		{
+			std::string text(
+				(std::istreambuf_iterator<char>(time_file)),
+				std::istreambuf_iterator<char>());
+			time_file.close();
+			std::string replace = std::to_string(elapsed_time);
+
+			text.replace(difficulty * 10, replace.length(), replace);
+
+			std::ofstream fout("world/best_time.txt", std::ios::trunc);
+			fout << text;
+			fout.close();
+		}
 		time_file.open("world/master_time.txt");
 		time_file >> best_time;
 		if(difficulty) time_file >> best_time;
-		if (best_time > elapsedTime)
+		if (best_time > elapsed_time)
 			screen->Centre("FINALLY A WORTHY OPPONENT! YOU BEAT THE MASTER!", 262, GreenMask , 2);
 	}
 
@@ -283,11 +299,12 @@ namespace Tmpl8
 	// -----------------------------------------------------------
 	void Game::Tick(float deltaTime)
 	{	
-		uint32_t currTime;
+		
 		switch (state_machine)
 		{
 		case menu:	
 			screen->Clear(0);
+			printMenuScreen(screen);
 			menuLine();
 			screen->Centre("PRESS ENTER TO START!", 210, GreenMask , 4);
 			if (GetAsyncKeyState(VK_RETURN)) // when enter is pressed then switch to play state
@@ -316,9 +333,7 @@ namespace Tmpl8
 			}
 			// clear the graphics window
 			screen->Clear(0);
-			currTime = (uint32_t)SDL_GetPerformanceCounter(); // displaying the current elapsed time
-			line = std::to_string(ceil(static_cast<double>(
-				(currTime - startTime) / static_cast<double>(SDL_GetPerformanceFrequency())) * 100.0) / 100.0);
+			line = std::to_string(ceil(elapsedTime() * 100.0) / 100.0);
 			std::strncpy(display_time, line.c_str(),7);
 			display_time[7] = '\0';
 			
