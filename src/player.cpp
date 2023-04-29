@@ -16,7 +16,7 @@ bool gravity_switch = true;
 
 // initialzing the player with its sprite and the given coordinates and radius
 Ball::Ball(float xIn, float yIn, int rIn) 
-	:	ball_sprite(new Tmpl8::Surface("assets/ball.png"),4)
+	:	ball_sprite(new Tmpl8::Surface("assets/ball.png"),36)
 {
 	coordinates.x = xIn, coordinates.y = yIn;
 	r = rIn;
@@ -27,7 +27,7 @@ Ball::Ball(float xIn, float yIn, int rIn)
 // printing the ball on the screen
 void Ball::printBall(Tmpl8::Surface* screen) 
 {
-	ball_sprite.SetFrame((unsigned int)roundf((float)((int)this->ball_sprite.GetSurface()->GetAngle() % 360) / 90.0f));
+	ball_sprite.SetFrame((unsigned int)roundf((float)((int)this->ball_sprite.GetSurface()->GetAngle() % 360) / 10.0f));
 	ball_sprite.DrawScaled((int)coordinates.x - r, (int)coordinates.y - r, r * 2, r * 2, screen);
 }
 

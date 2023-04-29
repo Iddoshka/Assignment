@@ -241,7 +241,7 @@ namespace Tmpl8
 		* if the best time isn't changed to the players' best time then it won't print
 		* if it is initialized then it will print the best time and ask if you can do better
 		*/
-		screen->Print(const_cast<char*>(diff_line.substr(difficulty * 4, 4).c_str()), 5, 5, RedMask , 2);
+		screen->Print(const_cast<char*>(diff_line.substr(difficulty * 4, 4).c_str()), 115, 105, RedMask , 2);
 		std::ifstream time_file("world/best_time.txt");
 		time_file >> best_time;
 		for (unsigned int i = 0; i < difficulty; i++)
