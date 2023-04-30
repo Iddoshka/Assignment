@@ -6,19 +6,21 @@
 
 namespace Tmpl8
 {
-	const int a_Width = 87;
-	const int a_Height = 78;
-	const int b_Width = 60;
-	const int b_Height = 60;
+	const int a_Width = 87; // gun sprite width
+	const int a_Height = 78; // gun sprite height
+	const int b_Width = 60; // bullet sprite width
+	const int b_Height = 60; // bullet sprite height
 
 	const unsigned int bullet_speed = 10;
 
+	// static func that gets gun angle and returns the corrosponding bullet sprite's frame number
 	static unsigned int angle_to_frame(unsigned int angle)
 	{
 		unsigned int frame = (unsigned int)roundf((angle % 360) / 22.5f);
 		return frame;
 	}
 
+	// static func that gets frame of the bullet and returns the right angle for that frame
 	static unsigned int frame_to_angle(unsigned int num_frame)
 	{
 		unsigned int angle = (int)(num_frame * (292.5f / 26.0f));
@@ -38,6 +40,7 @@ namespace Tmpl8
 			return false;
 	}
 
+	// function that takes a given sprite's metrics and coordinates and returns true if it is currently on screen
 	static bool on_screen(TileMaps map, vec2 coordinates, int width, int height)
 	{
 		bool x = false;
@@ -51,6 +54,7 @@ namespace Tmpl8
 		return (x && y);
 	}
 
+	// a static func that gets a bulltes frame and returns a vector with all the hitboxes of the bullet
 	static std::vector<vec4> hitBox(unsigned int frame, vec2 coordinates)
 	{
 		std::vector<vec4> hit_box;
@@ -146,9 +150,9 @@ namespace Tmpl8
 		default:
 			break;
 		}
-
+		//moving the hitboxes to the bullets location
 		for (vec4& a : hit_box)
-		{
+		{ 
 			a *= (b_Height / 20.0f);
 			a.x += coordinates.x;
 			a.y += coordinates.y;
@@ -166,6 +170,7 @@ namespace Tmpl8
 		coordinates = In_coordinates;
 	}
 
+	//overloads the DrawScaled function of the parent class(Sprite) so it will draw it with its current frame
 	void Gun::DrawScaled(Surface* screen, TileMaps map)
 	{
 		int posX = int(coordinates.x - map.getXoffSet() * (float)TileLength);
@@ -180,6 +185,7 @@ namespace Tmpl8
 		}
 	}
 
+	// checks if the gun is on screen, if it is it will draw itself and start trying shooting bullets
 	void Gun::render(Surface* screen, TileMaps map, Ball& player, uint32_t str_time)
 	{
 		if (!on_screen(map, coordinates, a_Width, a_Height))
@@ -188,7 +194,13 @@ namespace Tmpl8
 		shoot(player, screen, map, str_time);
 		DrawScaled(screen, map);
 	}
-
+	
+	/*
+	* if the gun fired a bullet already it will calculate its next trajectory and if after calculations
+	* its outside of its bounds it will destroy itself.
+	* if no bullet was fired it will check if the lapse time is correct to the gun object and if so it will
+	* create a bullet object
+	*/
 	void Gun::shoot(Ball& player, Surface* screen, TileMaps map, uint32_t str_time)
 	{
 		if (fired)
@@ -210,6 +222,7 @@ namespace Tmpl8
 		}
 	}
 
+	//destroys the bullet object of the gun object and resets the fired mode to false
 	void Gun::reset()
 	{
 		if (fired)
@@ -231,6 +244,11 @@ namespace Tmpl8
 		hit_boxes = hitBox(frame, coordinates);
 	}
 
+	/*
+	* function that calculates the balls trajectory by the const bulle_speed,
+	* it checks that the bullet is on screen before making any calculations,
+	* it will return false if the bullet is outside of its bounds or if it has hit the player
+	*/
 	bool Bullet::fly(Ball& player, Surface* screen, TileMaps map)
 	{
 		if(!on_screen(map,coordinates,b_Width,b_Height))
@@ -267,6 +285,7 @@ namespace Tmpl8
 		return true;
 	}
 
+	//overloads the DrawScaled function of the parent class(Sprite) so it will draw it with its current frame
 	void Bullet::DrawScaled(Surface* screen, TileMaps map)
 	{
 		int posX = int(coordinates.x - map.getXoffSet() * (float)TileLength);

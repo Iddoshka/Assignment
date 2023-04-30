@@ -20,23 +20,25 @@ namespace Tmpl8
 	};
 
 	static const std::string diff_line = "easyhard";
-	static std::string line;
+	static std::string line; // a string variable used to read lines from txt files
 	static constexpr float mapHeight = ScreenHeight / TileLength;
 	static constexpr float mapWidth = ScreenWidth / TileLength;
-	static constexpr float player_start_X = 19; // starting coordinates of the player
-	static constexpr float player_start_Y = 320;
+	static constexpr float player_start_X = 19; // starting X coordinates of the player
+	static constexpr float player_start_Y = 320; // starting Y coordinate of the player
 	static double best_time;
 	static uint32_t startTime;
 	static const std::vector<char*> map_files = { "world/map1.1.txt","world/map1.2.txt" }; // the two map txt files
 	static const std::vector<char*> object_files = { "world/objects1.1.txt","world/objects1.2.txt", "world/objects1.3.txt"}; // the two object txt files 
 	static const std::vector<char*> gun_files = { "world/guns_easy.txt","world/guns_hard.txt" }; // the two object txt files 
-	static char display_time[8];
-	char** eazyblock[2] = { new char* ("rax") ,new char* ("pf ")};
+	static char display_time[8]; // an array of chars that holds the displayed time
+	char** eazyblock[2] = { new char* ("rax") ,new char* ("pf ")}; // for adding and earsing blocks
 	static std::vector<obstacles> game_map_objects; // will contain all the objects of the game
 	TileMaps tilemap("assets/nc2tiles.png", (int)mapHeight * 3, (int)mapWidth * 3 * (int)map_files.size()); // the tilemap class object
-	static std::vector<Gun*> guns[2];
+	// a 2 cell array that holds vectors containing the easy mode gun objects and the hard mode
+	static std::vector<Gun*> guns[2]; 
 	Ball player(player_start_X, player_start_Y, 18); // ball class object
-	Surface* menu_screen = new Surface("assets/menu.png");
+	Surface* menu_screen = new Surface("assets/menu.png"); // custom menu screen
+	Surface* victory_screen = new Surface("assets/victory.png"); // custom victory screen 
 
 	static double elapsedTime()
 	{
@@ -47,18 +49,25 @@ namespace Tmpl8
 		return elapsed_time;
 	}
 
-	static void printMenuScreen(Surface* screen)
+	/*
+	* static func that prints a custom screen
+	*/
+	static void printScreen(Surface* screen ,Surface* src = menu_screen)
 	{
 		Pixel* dst = screen->GetBuffer();
 		for (int i = 0; i < ScreenWidth; i++)
 		{
 			for (int j = 0; j < ScreenHeight; j++)
 			{
-				dst[i + j * ScreenWidth] = menu_screen->GetBuffer()[i + j * ScreenWidth];
+				dst[i + j * ScreenWidth] = src->GetBuffer()[i + j * ScreenWidth];
 			}
 		}
 	}
 
+
+	/*
+	* static function that opens the txt file that holds all the information about the gun objects
+	*/
 	static void openGuns(const std::vector<char*>& a_file)
 	{
 		std::ifstream gun_file;
@@ -82,6 +91,8 @@ namespace Tmpl8
 		}
 	}
 
+
+	// function that deletes all the allocated memory
 	void Game::cleanup()
 	{
 		for (int i = 0; i < 2; i++)
@@ -94,6 +105,7 @@ namespace Tmpl8
 		}
 		tilemap.cleanup();
 		delete menu_screen;
+		delete victory_screen;
 	}
 
 	// the flow between states of the state machine
@@ -304,7 +316,7 @@ namespace Tmpl8
 		{
 		case menu:	
 			screen->Clear(0);
-			printMenuScreen(screen);
+			printScreen(screen);
 			menuLine();
 			screen->Centre("PRESS ENTER TO START!", 210, GreenMask , 4);
 			if (GetAsyncKeyState(VK_RETURN)) // when enter is pressed then switch to play state
@@ -357,6 +369,7 @@ namespace Tmpl8
 			if (player.victory())
 			{// winning messege
 				screen->Clear(0);
+				printScreen(screen, victory_screen);
 				screen->Centre("YOU'VE WON!", 210, GreenMask, 4);
 				winningLine();
 			}

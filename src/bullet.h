@@ -12,13 +12,13 @@ namespace Tmpl8
 		bool fly(Ball& player, Surface* screen, TileMaps map);
 
 		vec2 coordinates = { 0,0 };
-		vec2 str_cord = coordinates;
+		vec2 str_cord = coordinates; // the bullets starting coordinates
 
 	private:
 		unsigned int angle = 0;
 		unsigned int frame = 0;
 
-		std::vector<vec4> hit_boxes;
+		std::vector<vec4> hit_boxes; // vector containing all the hitboxes of the bullet frame
 
 		void DrawScaled(Surface* screen, TileMaps map);
 	};

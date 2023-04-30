@@ -19,9 +19,9 @@ namespace Tmpl8
 
 		vec2 coordinates;
 		unsigned int frame;
-		double lapse;
-		Bullet* casing;
-		bool fired = false;
+		double lapse; // the minimum time period between each bullet
+		Bullet* casing; // the bullet object of the gun
+		bool fired = false; // bool variable that tells if a bullet was fired or not
 		void shoot(Ball& player, Surface* screen, TileMaps map, uint32_t str_time);
 		void DrawScaled(Surface* screen, TileMaps map);
 	};

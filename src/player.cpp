@@ -196,10 +196,11 @@ void Ball::positioningX(TileMaps &map)
 	*/
 	// checking if the ball is heading towards the left edge of the map or the right edge of the map
 	bool edgeX = ((map.getXoffSet() == (map.getWidth() / 3.0f - ScreenWidth	/ TileLength) && velocity.x > 0) || (map.getXoffSet() == 0.0f && velocity.x < 0));
-
+	float temp_coordX = coordinates.x + velocity.x;
 	if (coordinates.x != ScreenWidth / 2 && !edgeX)
 	{
-		if (((coordinates.x > ScreenWidth / 2) && (pcord.x <= ScreenWidth / 2)) || ((coordinates.x < ScreenWidth / 2) && (pcord.x >= ScreenWidth / 2)))
+		if (((coordinates.x > ScreenWidth / 2) && (temp_coordX <= ScreenWidth / 2)) || 
+			((coordinates.x < ScreenWidth / 2) && (temp_coordX >= ScreenWidth / 2)))
 		{ //if the ball has passed the center of the screen than I place him in the center and add the remaining velocity to the horizontal offset
 			map.setXoffSet(map.getXoffSet() + ((ScreenWidth / 2 - coordinates.x) / TileLength) * dir.x);
 			coordinates.x = ScreenWidth / 2;
@@ -274,17 +275,17 @@ void Ball::fixCollision(TileMaps& map, Tmpl8::vec2 newCord)
 	Tmpl8::vec2 dist(coordinates - newCord);
 	if(!edgeX && coordinates.x != ScreenWidth / 2)
 	{
-		if (coordinates.x < (ScreenWidth / 2) && newCord.x >= (ScreenWidth / 2) ||
-			coordinates.x > (ScreenWidth / 2) && newCord.x <= (ScreenWidth / 2))
+		if (coordinates.x < (float)(ScreenWidth / 2) && newCord.x >= (float)(ScreenWidth / 2) ||
+			coordinates.x >(float)(ScreenWidth / 2) && newCord.x <= (float)(ScreenWidth / 2))
 		{
-			dist.x -= ScreenWidth / 2 - coordinates.x;
+			dist.x -= ScreenWidth / 2.0f - coordinates.x;
 			coordinates.x = ScreenWidth / 2.0f;
 			map.setXoffSet(map.getXoffSet() + (dist.x * dir.x) / TileLength);
 		}
 		else
 			coordinates.x = newCord.x;
 	}
-	else if (edgeX || coordinates.x != ScreenWidth / 2)
+	else if (edgeX)
 		coordinates.x = newCord.x;
 	else
 		map.setXoffSet(map.getXoffSet() + (abs(dist.x) * dir.x) / TileLength);
