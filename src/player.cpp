@@ -138,7 +138,7 @@ Tmpl8::vec2 Ball::findContact(Tmpl8::vec2 diff)
 bool Ball::checkCollisionX(TileMaps map, Tmpl8::vec2 coor)
 { // adding the offset of each axis so it will check collision on the real map coordiantes
 	coor = { coor.x + map.getXoffSet() * TileLength, coor.y + map.getYoffSet() *TileLength};
-	for (auto a : map.getColliders())
+	for (const Tmpl8::vec4& a : map.getColliders())
 	{
 		Tmpl8::vec2 diff = checkCollision(a, coor);
 		if (abs(diff.x) < 0.001)
